@@ -27,6 +27,14 @@ def login_view(request):
 
         if usuario is not None:
             login(request, usuario)
+
+            if request.POST.get('lembrar_me') == 'on':
+                # Mantém a sessão por 14 dias.
+                request.session.set_expiry(60 * 60 * 24 * 14)
+            else:
+                # Expira a sessão ao fechar o navegador.
+                request.session.set_expiry(0)
+
             return redirect('inicio')
 
         erro = 'Usuário ou senha inválidos.'

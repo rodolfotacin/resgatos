@@ -89,7 +89,7 @@
                         <input type="password" class="form-control login-input login-password-input" id="password" name="password" placeholder="Senha" autocomplete="current-password">
                        
                         <!-- Botão visualizar senha -->
-                        <button type="button" class="login-password-toggle" id="togglePassword" aria-label="Mostrar senha" >
+                        <button type="button" class="login-password-toggle" id="toggle-password" aria-label="Mostrar senha" aria-pressed="false" >
                             <!-- Eye -->
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -111,7 +111,12 @@
 
                 <div class="login-options mb-4">
                     <label class="form-check">
-                        <input type="checkbox" class="form-check-input" name="remember" value="1">
+                        <input
+                            type="checkbox"
+                            class="form-check-input"
+                            name="lembrar_me"
+                            id="lembrar_me"
+                        >
                         <span class="form-check-label">Lembrar-me</span>
                     </label>
                     <a href="#" class="login-forgot">Esqueceu seu senha?</a>
@@ -148,5 +153,7 @@
 </div>
 
 <script src="{% static 'vendor/tabler/js/tabler.js' %}"></script>
+<script src="{% static 'js/login.js' %}"></script>
+
 </body>
 </html>

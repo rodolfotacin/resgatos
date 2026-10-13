@@ -38,7 +38,7 @@
         <nav class="resgatos-sidebar-nav" aria-label="Navegação principal">
 
             <!-- INICIO -->
-            <a href="{% url 'inicio' %}" class="resgatos-nav-item" aria-label="Inicio" title="Início">
+            <a href="{% url 'inicio' %}" class="resgatos-nav-item {% if request.resolver_match.url_name == 'inicio' %} is-active{% endif %}" aria-label="Inicio" title="Início">
                 <span class="resgatos-nav-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M5 12l7-7 7 7"/>
@@ -51,7 +51,7 @@
           <div class="resgatos-nav-separator"></div>
 
             <!-- PESSOAS -->
-            <a href="{% url 'pessoas:lista' %}" class="resgatos-nav-item" aria-label="Pessoas" title="Pessoas">
+            <a href="{% url 'pessoas:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'pessoas' %} is-active{% endif %}" aria-label="Pessoas" title="Pessoas">
                 <span class="resgatos-nav-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="9" cy="7" r="4"/>
@@ -63,7 +63,7 @@
             </a>
 
             <!-- PETS -->
-            <a href="{% url 'pets:lista' %}" class="resgatos-nav-item" aria-label="Pets" title="Pets">
+            <a href="{% url 'pets:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'pets' %} is-active{% endif %}" aria-label="Pets" title="Pets">
                 <span class="resgatos-nav-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -77,7 +77,7 @@
             </a>
 
             <!-- RESGATES -->
-            <a href="{% url 'resgates:lista' %}" class="resgatos-nav-item" aria-label="Resgates" title="Resgates">
+            <a href="{% url 'resgates:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'resgates' %} is-active{% endif %}" aria-label="Resgates" title="Resgates">
                 <span class="resgatos-nav-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -90,7 +90,7 @@
             </a>
 
             <!-- ATENDIMENTO -->
-            <a href="{% url 'atendimentos:lista' %}" class="resgatos-nav-item" aria-label="Atendimento" title="Atendimento">
+            <a href="{% url 'atendimentos:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'atendimentos' %} is-active{% endif %}" aria-label="Atendimento" title="Atendimento">
                 <span class="resgatos-nav-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -106,7 +106,7 @@
           <div class="resgatos-nav-separator"></div>
 
             <!-- ESTOQUE -->
-            <a href="{% url 'estoque:lista' %}" class="resgatos-nav-item" aria-label="Estoque" title="Estoque">
+            <a href="{% url 'estoque:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'estoque' %} is-active{% endif %}" aria-label="Estoque" title="Estoque">
                 <span class="resgatos-nav-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -116,7 +116,7 @@
             </a>
 
             <!-- FORNECEDORES -->
-            <a href="{% url 'fornecedores:lista' %}" class="resgatos-nav-item" aria-label="Fornecedores" title="Fornecedores">
+            <a href="{% url 'fornecedores:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'fornecedores' %} is-active{% endif %}" aria-label="Fornecedores" title="Fornecedores">
                 <span class="resgatos-nav-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />

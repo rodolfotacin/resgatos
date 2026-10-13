@@ -1,0 +1,274 @@
+{% extends 'base/app.html' %}
+{% load static %}
+
+{% block title %}Início | Resgatos{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'vendor/tabler/css/tabler-icons.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/list.css' %}">
+
+<div class="portal-page portal-students">
+
+
+    <!-- Cabeçalho da página -->
+    <header class="portal-page-header">
+
+        <div class="portal-page-heading">
+            <div class="portal-page-icon" aria-hidden="true">
+                <i class="ti ti-users"></i>
+            </div>
+
+            <div>
+                <h1 class="portal-page-title">Pessoas</h1>
+                <p class="portal-page-description">
+                    Cadastro de clientes, doadores e colaboradores
+                </p>
+            </div>
+        </div>
+
+        <nav class="portal-breadcrumb" aria-label="Navegação estrutural">
+            <a href="#">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+
+            <span aria-hidden="true">/</span>
+            <span>Pessoas</span>
+
+        </nav>
+
+    </header>
+
+
+    <!-- Filtros da listagem -->
+    <section class="portal-filter card" aria-label="Filtros de pessoas">
+
+        <div class="card-body">
+
+            <form method="get" action="" class="portal-filter-form">
+
+                <div class="portal-search-row">
+
+                    <div class="portal-search-input">
+                        <label for="student-search" class="visually-hidden">
+                            Pesquisar pessoas
+                        </label>
+
+                        <i class="ti ti-search" aria-hidden="true"></i>
+
+                        <input
+                            type="search"
+                            id="student-search"
+                            name="q"
+                            class="form-control"
+                            placeholder="Pesquisar por Nome, CPF, Telefone ou Nome do Pet..."
+                            value=""
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-search me-1" aria-hidden="true"></i>
+                        Buscar
+                    </button>
+
+                    <a href="?"
+                       class="btn btn-outline-secondary">
+                        <i class="ti ti-refresh me-1" aria-hidden="true"></i>
+                        Limpar filtros
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </section>
+
+
+    <!-- Listagem de Pessoas -->
+    <section class="portal-list-card card">
+
+        <div class="portal-list-header">
+
+            <div class="data-list-heading">
+                <h2 class="data-list-title">Pessoas cadastradas</h2>
+                <p class="data-list-count">
+                    Exibindo <strong>0-20</strong> de <strong>180</strong> Pessoas
+                </p>
+            </div>
+
+            <div class="portal-page-actions">
+                <a href="#"
+                   class="btn btn-primary"
+                   aria-label="Adicionar pessoa">
+                    <i class="ti ti-plus me-1" aria-hidden="true"></i>
+                    Adicionar Pessoa
+                </a>
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-vcenter portal-students-table">
+
+                <thead>
+                <tr>
+                    <th scope="col" class="portal-col-photo"></th>
+                    <th scope="col">Nome</th>
+                    <th scope="col" class="text-center">Telefone(s)</th>
+                    <th scope="col">Pet(s)</th>
+                    <th scope="col" class="text-center">Situação</th>
+                    <th scope="col" class="text-center"></th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+
+
+<!--                    <tr>-->
+<!--                        <td colspan="7" class="portal-empty-state">-->
+<!--                            <i class="ti ti-users"-->
+<!--                               aria-hidden="true"></i>-->
+
+<!--                            <p>Nenhum cadastro encontrado.</p>-->
+
+<!--                            <span>-->
+<!--                                    Ajuste os filtros ou faça uma nova pesquisa.-->
+<!--                                </span>-->
+<!--                        </td>-->
+<!--                    </tr>-->
+
+
+
+
+
+                        <tr>
+                            <td>
+                                <div class="portal-student-avatar">
+                                    <div class="alpha-init">Al</div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <a href="#" class="portal-student-name">
+                                    Fulano da Silva
+                                </a>
+
+                                <div class="portal-student-meta">
+                                    999.999.999-99
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                (16) 99999-9999
+                                   <br />
+                            </td>
+
+                            <td>
+                                <a href="#">Mingau</a><br />
+                            </td>
+
+                            <td class="text-center">
+                                    <span class="badge bg-green-lt">
+                                        <i class="portal-circle-filled"></i>
+                                        Ativo
+                                    </span>
+                            </td>
+
+                            <td>
+                                <div class="portal-row-actions">
+
+                                    <a href="#"
+                                       class="btn btn-outline-secondary btn-icon"
+                                       aria-label="Visualizar pessoa">
+                                        <i class="ti ti-eye"
+                                           aria-hidden="true"></i>
+                                    </a>
+
+                                    <a href="#"
+                                       class="btn btn-outline-secondary btn-icon"
+                                       aria-label="Editar pessoa">
+                                        <i class="ti ti-pencil"
+                                           aria-hidden="true"></i>
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-icon"
+                                            aria-label="Mais opções">
+                                        <i class="ti ti-dots-vertical"
+                                           aria-hidden="true"></i>
+                                    </button>
+
+                                </div>
+                            </td>
+                        </tr>
+
+
+
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- Paginação: estrutura visual inicial -->
+        <footer class="portal-list-footer">
+
+            <div class="data-list-footer">
+
+                <div class="data-list-page-size">
+                    <label for="page-size">Exibir</label>
+
+                    <select id="page-size" name="limit"
+                            class="form-select">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+
+                    <span>itens por página</span>
+                </div>
+
+                <nav class="data-list-pagination"
+                     aria-label="Paginação">
+
+                    <a href="#"
+                       class="data-list-page data-list-page-disabled"
+                       aria-label="Página anterior"
+                       aria-disabled="true">
+                        <i class="ti ti-chevron-left" aria-hidden="true"></i>
+                    </a>
+
+                    <a href="#" class="data-list-page data-list-page-active"
+                       aria-current="page">1</a>
+
+                    <a href="#" class="data-list-page">2</a>
+                    <a href="#" class="data-list-page">3</a>
+                    <a href="#" class="data-list-page">4</a>
+                    <a href="#" class="data-list-page">5</a>
+
+                    <span class="data-list-page-ellipsis">…</span>
+
+                    <a href="#" class="data-list-page">25</a>
+
+                    <a href="#" class="data-list-page"
+                       aria-label="Próxima página">
+                        <i class="ti ti-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </nav>
+
+            </div>
+
+        </footer>
+
+    </section>
+
+</div>
+
+{% endblock %}

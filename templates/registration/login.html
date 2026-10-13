@@ -1,0 +1,152 @@
+{% load static %}
+
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resgatos — Acesso</title>
+    <link rel="stylesheet" href="{% static 'vendor/tabler/css/tabler.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+
+<body>
+<div class="login-page">
+    <div class="login-image">
+        <div class="login-image-overlay"></div>
+        <div class="login-image-message">
+        "Todo gato resgatado tem uma nova chance<br>
+        para um futuro melhor."
+    </div>
+    </div>
+
+    <div class="login-panel">
+        <div class="login-form-wrapper">
+            <div class="login-logo">
+                <img src="{% static 'img/common/logo-resgatos.png' %}" alt="ONG Resgatos">
+            </div>
+
+            <div class="login-header">
+                <h1>Bem-vindo(a)</h1>
+                <p>Acesse sua conta</p>
+            </div>
+
+            {% if erro %}
+                <div class="alert alert-danger" role="alert">
+                    {{ erro }}
+                </div>
+            {% endif %}
+
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label" for="username">Usuário</label>
+                    <div class="login-input-wrapper">
+                        <!-- Ícone usuário -->
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="login-input-icon"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                            <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                        </svg>
+                        <input type="text" class="form-control login-input" id="username" name="username" placeholder="Digite seu e-mail" autocomplete="username">
+                    </div>
+                </div>
+
+               <div class="mb-3">
+                    <label class="form-label" for="password">Senha</label>
+                    <div class="login-input-wrapper">
+                        <!-- Ícone cadeado -->
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="login-input-icon"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <rect x="4" y="11" width="16" height="10" rx="2" />
+                            <circle cx="12" cy="16" r="1" />
+                            <path d="M8 11v-4a4 4 0 0 1 8 0v4" />
+                        </svg> 
+
+                        <input type="password" class="form-control login-input login-password-input" id="password" name="password" placeholder="Senha" autocomplete="current-password">
+                       
+                        <!-- Botão visualizar senha -->
+                        <button type="button" class="login-password-toggle" id="togglePassword" aria-label="Mostrar senha" >
+                            <!-- Eye -->
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+                                <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="login-options mb-4">
+                    <label class="form-check">
+                        <input type="checkbox" class="form-check-input" name="remember" value="1">
+                        <span class="form-check-label">Lembrar-me</span>
+                    </label>
+                    <a href="#" class="login-forgot">Esqueceu seu senha?</a>
+                </div>
+
+                 <button type="submit" class="btn btn-primary w-100">Entrar →</button>
+
+            </form>
+
+            <div class="login-message">
+                <div class="login-message-divider">
+                    <span></span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1280" class="login-paw" aria-hidden="true">
+                    <g transform="translate(0,1280) scale(0.1,-0.1)" fill="currentColor" stroke="none">
+                        <path d="M4615 12476 c-167 -39 -293 -112 -436 -255 -116 -115 -199 -232 -279 -391 -477 -954 -316 -2528 353 -3430 91 -123 249 -285 357 -366 354 -267 752 -281 1071 -38 327 250 551 732 636 1369 21 164 25 672 5 840 -82 702 -291 1283 -618 1722 -82 109 -243 273 -344 350 -94 71 -272 163 -365 188 -83 23 -302 29 -380 11z"/>
+                        <path d="M8546 12274 c-311 -61 -636 -299 -905 -661 -346 -465 -580 -1080 -668 -1758 -28 -216 -25 -698 5 -894 70 -447 219 -789 442 -1011 191 -192 431 -281 675 -252 581 72 1154 706 1460 1616 254 755 281 1550 73 2156 -203 591 -615 897 -1082 804z"/>
+                        <path d="M2095 9010 c-409 -65 -717 -395 -856 -919 -79 -301 -90 -716 -28 -1081 143 -850 635 -1631 1217 -1933 298 -154 595 -181 850 -75 376 156 623 560 704 1153 16 119 16 472 -1 610 -130 1102 -809 2069 -1564 2230 -89 19 -247 26 -322 15z"/>
+                        <path d="M10570 8200 c-360 -77 -713 -330 -1006 -722 -318 -426 -532 -982 -594 -1542 -16 -146 -13 -460 5 -601 122 -948 766 -1403 1495 -1059 391 185 745 566 998 1073 480 960 449 2085 -73 2606 -220 220 -523 310 -825 245z"/>
+                        <path d="M6225 6421 c-662 -118 -1497 -813 -2237 -1861 -579 -821 -987 -1705 -1109 -2405 -29 -168 -32 -468 -6 -583 41 -179 110 -297 244 -422 224 -207 493 -329 830 -376 175 -24 529 -15 754 19 301 47 555 108 1124 272 550 158 704 191 856 181 193 -13 338 -60 754 -243 298 -131 464 -193 606 -228 530 -128 976 39 1435 537 137 148 179 220 222 377 24 90 26 110 26 321 0 191 -3 245 -23 355 -118 667 -469 1473 -976 2240 -603 912 -1311 1569 -1902 1764 -215 71 -398 87 -598 52z"/>
+                    </g>
+                </svg>
+                    <span></span>
+                </div>
+            </div>
+
+            <!-- Rodapé -->
+            <div class="login-footer">
+                <span>Resgatos</span>
+                <span class="login-footer-separator">•</span>
+                <span>Gestão da ONG</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'vendor/tabler/js/tabler.js' %}"></script>
+</body>
+</html>

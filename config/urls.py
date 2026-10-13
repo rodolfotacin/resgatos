@@ -14,9 +14,35 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
+
 from django.contrib import admin
-from django.urls import path
+from django.contrib.auth.views import LogoutView
+from django.urls import include, path
+from django.shortcuts import render, redirect
+
+from apps.pessoas.views import login_view
+
+def inicio_view(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    return render(request, 'inicio.html')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Autenticação
+    path('', login_view, name='login'),
+    path('sair/', LogoutView.as_view(next_page='login'), name='logout'),
+
+    # Aplicação
+    path('inicio/', inicio_view, name='inicio'),
+    path('pessoas/', include('apps.pessoas.urls')),
+    path('pets/', include('apps.pets.urls')),
+    path('resgates/', include('apps.resgates.urls')),
+    path('atendimentos/', include('apps.atendimentos.urls')),
+    path('estoque/', include('apps.estoque.urls')),
+    path('fornecedores/', include('apps.fornecedores.urls')),
 ]

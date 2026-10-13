@@ -1,5 +1,6 @@
 {% extends 'base/app.html' %}
 {% load static %}
+{% load text_tags %}
 
 {% block title %}Início | Resgatos{% endblock %}
 
@@ -92,7 +93,7 @@
             <div class="data-list-heading">
                 <h2 class="data-list-title">Pessoas cadastradas</h2>
                 <p class="data-list-count">
-                    Exibindo <strong>0-20</strong> de <strong>180</strong> Pessoas
+                    Exibindo <strong>1-20</strong> de <strong>180</strong> Pessoas
                 </p>
             </div>
 
@@ -107,11 +108,8 @@
 
         </div>
 
-
         <div class="table-responsive">
-
             <table class="table table-vcenter portal-students-table">
-
                 <thead>
                 <tr>
                     <th scope="col" class="portal-col-photo"></th>
@@ -125,26 +123,10 @@
 
                 <tbody>
 
-
-
-<!--                    <tr>-->
-<!--                        <td colspan="7" class="portal-empty-state">-->
-<!--                            <i class="ti ti-users"-->
-<!--                               aria-hidden="true"></i>-->
-
-<!--                            <p>Nenhum cadastro encontrado.</p>-->
-
-<!--                            <span>-->
-<!--                                    Ajuste os filtros ou faça uma nova pesquisa.-->
-<!--                                </span>-->
-<!--                        </td>-->
-<!--                    </tr>-->
-
-
-
-
+                    {% for pessoa in pessoas %}
 
                         <tr>
+
                             <td>
                                 <div class="portal-student-avatar">
                                     <div class="alpha-init">Al</div>
@@ -153,66 +135,74 @@
 
                             <td>
                                 <a href="#" class="portal-student-name">
-                                    Fulano da Silva
+                                    {{ pessoa.nome }}
                                 </a>
-
                                 <div class="portal-student-meta">
-                                    999.999.999-99
+                                    {{ pessoa.cpf }}
                                 </div>
                             </td>
 
                             <td class="text-center">
-                                (16) 99999-9999
-                                   <br />
+                                {{ pessoa.telefone|telefone }}<br />
                             </td>
 
                             <td>
-                                <a href="#">Mingau</a><br />
+                                {% for vinculo in pessoa.vinculos_pets.all %}
+                                    {% if not vinculo.data_fim %}
+                                        <a href="#">{{ vinculo.pet.nome }}</a>
+                                    {% endif %}
+                                {% empty %}
+                                    <span class="text-secondary">Nenhum pet relacionado</span>
+                                {% endfor %}
                             </td>
 
                             <td class="text-center">
                                     <span class="badge bg-green-lt">
                                         <i class="portal-circle-filled"></i>
-                                        Ativo
+                                        {{ pessoa.is_active|yesno:"Ativo,Inativo" }}
                                     </span>
                             </td>
 
                             <td>
                                 <div class="portal-row-actions">
-
                                     <a href="#"
                                        class="btn btn-outline-secondary btn-icon"
                                        aria-label="Visualizar pessoa">
                                         <i class="ti ti-eye"
                                            aria-hidden="true"></i>
                                     </a>
-
                                     <a href="#"
                                        class="btn btn-outline-secondary btn-icon"
                                        aria-label="Editar pessoa">
                                         <i class="ti ti-pencil"
                                            aria-hidden="true"></i>
                                     </a>
-
                                     <button type="button"
                                             class="btn btn-outline-secondary btn-icon"
                                             aria-label="Mais opções">
                                         <i class="ti ti-dots-vertical"
                                            aria-hidden="true"></i>
                                     </button>
-
                                 </div>
                             </td>
+
                         </tr>
 
+                    {% empty %}
 
+                    <tr>
+                        <td colspan="7" class="portal-empty-state">
+                            <i class="ti ti-users"
+                               aria-hidden="true"></i>
+                            <p>Nenhum cadastro encontrado.</p>
+                            <span>Ajuste os filtros ou faça uma nova pesquisa.</span>
+                        </td>
+                    </tr>
 
-
+                    {% endfor %}
 
                 </tbody>
-
             </table>
-
         </div>
 
 

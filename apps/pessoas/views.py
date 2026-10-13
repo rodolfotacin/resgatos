@@ -41,7 +41,9 @@ def login_view(request):
 def lista(request):
     busca = request.GET.get('busca', '').strip()
 
-    pessoas = Pessoa.objects.all()
+    pessoas = Pessoa.objects.prefetch_related(
+        'vinculos_pets__pet'
+    ).all()
 
     if busca:
         pessoas = pessoas.filter(

@@ -25,3 +25,22 @@ def get_initials(name: str) -> str:
         return initials.upper()
 
     return initials[0].upper() + initials[1].lower()
+
+
+
+def get_telefone(value: str) -> str:
+    if not value:
+        return ''
+
+    numeros = ''.join(
+        char for char in str(value)
+        if char.isdigit()
+    )
+
+    if len(numeros) == 11:
+        return f'({numeros[:2]}) {numeros[2:7]}-{numeros[7:]}'
+
+    if len(numeros) == 10:
+        return f'({numeros[:2]}) {numeros[2:6]}-{numeros[6:]}'
+
+    return value

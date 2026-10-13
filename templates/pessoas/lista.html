@@ -9,26 +9,26 @@
 <link rel="stylesheet" href="{% static 'vendor/tabler/css/tabler-icons.min.css' %}">
 <link rel="stylesheet" href="{% static 'css/components/list.css' %}">
 
-<div class="portal-page portal-students">
+<div class="resgatos-page resgatos-people">
 
 
     <!-- Cabeçalho da página -->
-    <header class="portal-page-header">
+    <header class="resgatos-page-header">
 
-        <div class="portal-page-heading">
-            <div class="portal-page-icon" aria-hidden="true">
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
                 <i class="ti ti-users"></i>
             </div>
 
             <div>
-                <h1 class="portal-page-title">Pessoas</h1>
-                <p class="portal-page-description">
+                <h1 class="resgatos-page-title">Pessoas</h1>
+                <p class="resgatos-page-description">
                     Cadastro de clientes, doadores e colaboradores
                 </p>
             </div>
         </div>
 
-        <nav class="portal-breadcrumb" aria-label="Navegação estrutural">
+        <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
             <a href="#">
                 <i class="ti ti-home" aria-hidden="true"></i>
                 Início
@@ -43,61 +43,80 @@
 
 
     <!-- Filtros da listagem -->
-    <section class="portal-filter card" aria-label="Filtros de pessoas">
+    <section class="resgatos-filter card" aria-label="Filtros de pessoas">
 
         <div class="card-body">
 
-            <form method="get" action="" class="portal-filter-form">
+            <form method="get" action="{% url 'pessoas:lista' %}" class="resgatos-filter-form">
 
-                <div class="portal-search-row">
+                <div class="resgatos-search-row">
 
-                    <div class="portal-search-input">
-                        <label for="student-search" class="visually-hidden">
+                    <div class="resgatos-search-input">
+                        <label for="people-search" class="visually-hidden">
                             Pesquisar pessoas
                         </label>
 
-                        <i class="ti ti-search" aria-hidden="true"></i>
+                        <i class="ti ti-search me-1" aria-hidden="true"></i>
 
                         <input
                             type="search"
-                            id="student-search"
-                            name="q"
+                            name="busca"
                             class="form-control"
                             placeholder="Pesquisar por Nome, CPF, Telefone ou Nome do Pet..."
-                            value=""
+                            value="{{ busca }}"
+                        >
+                        <input
+                            type="hidden"
+                            name="por_pagina"
+                            value="{{ por_pagina }}"
                         >
                     </div>
 
                     <button type="submit" class="btn btn-primary">
-                        <i class="ti ti-search me-1" aria-hidden="true"></i>
+                        <i class="ti ti-search me-1"></i>
                         Buscar
                     </button>
 
-                    <a href="?"
+                    <a href="{% url 'pessoas:lista' %}"
                        class="btn btn-outline-secondary">
-                        <i class="ti ti-refresh me-1" aria-hidden="true"></i>
+                        <i class="ti ti-refresh me-1"></i>
                         Limpar filtros
                     </a>
+
                 </div>
             </form>
+
+            {% if busca %}
+                <div class="alert alert-primary d-flex align-items-center justify-content-between" style="margin-top:20px"
+                     role="status">
+
+                    <div>
+                        <i class="ti ti-filter me-2"></i>
+                        <strong>Filtro ativo:</strong>
+                        resultados para
+                        <strong>"{{ busca }}"</strong>.
+                    </div>
+
+                </div>
+            {% endif %}
 
         </div>
     </section>
 
 
     <!-- Listagem de Pessoas -->
-    <section class="portal-list-card card">
+    <section class="resgatos-list-card card">
 
-        <div class="portal-list-header">
+        <div class="resgatos-list-header">
 
             <div class="data-list-heading">
                 <h2 class="data-list-title">Pessoas cadastradas</h2>
                 <p class="data-list-count">
-                    Exibindo <strong>1-20</strong> de <strong>180</strong> Pessoas
+                    Exibindo {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ paginator.count }} Pessoas
                 </p>
             </div>
 
-            <div class="portal-page-actions">
+            <div class="resgatos-page-actions">
                 <a href="#"
                    class="btn btn-primary"
                    aria-label="Adicionar pessoa">
@@ -109,10 +128,10 @@
         </div>
 
         <div class="table-responsive">
-            <table class="table table-vcenter portal-students-table">
+            <table class="table table-vcenter resgatos-people-table">
                 <thead>
                 <tr>
-                    <th scope="col" class="portal-col-photo"></th>
+                    <th scope="col" class="resgatos-col-photo"></th>
                     <th scope="col">Nome</th>
                     <th scope="col" class="text-center">Telefone(s)</th>
                     <th scope="col">Pet(s)</th>
@@ -128,16 +147,16 @@
                         <tr>
 
                             <td>
-                                <div class="portal-student-avatar">
+                                <div class="resgatos-people-avatar">
                                     <div class="alpha-init">Al</div>
                                 </div>
                             </td>
 
                             <td>
-                                <a href="#" class="portal-student-name">
+                                <a href="#" class="resgatos-people-name">
                                     {{ pessoa.nome }}
                                 </a>
-                                <div class="portal-student-meta">
+                                <div class="resgatos-people-meta">
                                     {{ pessoa.cpf }}
                                 </div>
                             </td>
@@ -158,13 +177,13 @@
 
                             <td class="text-center">
                                     <span class="badge bg-green-lt">
-                                        <i class="portal-circle-filled"></i>
+                                        <i class="resgatos-circle-filled"></i>
                                         {{ pessoa.is_active|yesno:"Ativo,Inativo" }}
                                     </span>
                             </td>
 
                             <td>
-                                <div class="portal-row-actions">
+                                <div class="resgatos-row-actions">
                                     <a href="#"
                                        class="btn btn-outline-secondary btn-icon"
                                        aria-label="Visualizar pessoa">
@@ -191,7 +210,7 @@
                     {% empty %}
 
                     <tr>
-                        <td colspan="7" class="portal-empty-state">
+                        <td colspan="7" class="resgatos-empty-state">
                             <i class="ti ti-users"
                                aria-hidden="true"></i>
                             <p>Nenhum cadastro encontrado.</p>
@@ -207,52 +226,74 @@
 
 
         <!-- Paginação: estrutura visual inicial -->
-        <footer class="portal-list-footer">
+        <footer class="resgatos-list-footer">
 
             <div class="data-list-footer">
 
                 <div class="data-list-page-size">
-                    <label for="page-size">Exibir</label>
+                    <form method="get" class="d-inline-flex align-items-center gap-2">
+                        <input
+                            type="hidden"
+                            name="busca"
+                            value="{{ busca }}"
+                        >
 
-                    <select id="page-size" name="limit"
-                            class="form-select">
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                    </select>
+                        <label for="por_pagina">Exibir</label>
 
-                    <span>itens por página</span>
+                        <select
+                            name="por_pagina"
+                            id="por_pagina"
+                            class="form-select"
+                            onchange="this.form.submit()"
+                        >
+                            <option value="10" {% if por_pagina == 10 %}selected{% endif %}>10</option>
+                            <option value="20" {% if por_pagina == 20 %}selected{% endif %}>20</option>
+                            <option value="50" {% if por_pagina == 50 %}selected{% endif %}>50</option>
+                            <option value="100" {% if por_pagina == 100 %}selected{% endif %}>100</option>
+                        </select>
+
+                        <span>itens por página</span>
+                    </form>
                 </div>
 
-                <nav class="data-list-pagination"
-                     aria-label="Paginação">
+                <nav aria-label="Paginação de pessoas">
+                    <ul class="pagination mb-0">
 
-                    <a href="#"
-                       class="data-list-page data-list-page-disabled"
-                       aria-label="Página anterior"
-                       aria-disabled="true">
-                        <i class="ti ti-chevron-left" aria-hidden="true"></i>
-                    </a>
+                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                            {% if page_obj.has_previous %}
+                                <a class="page-link"
+                                   href="?page={{ page_obj.previous_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                                   aria-label="Página anterior">
+                                    &lsaquo;
+                                </a>
+                            {% else %}
+                                <span class="page-link">&lsaquo;</span>
+                            {% endif %}
+                        </li>
 
-                    <a href="#" class="data-list-page data-list-page-active"
-                       aria-current="page">1</a>
+                        {% for numero in paginator.page_range %}
+                            <li class="page-item {% if numero == page_obj.number %}active{% endif %}">
+                                <a class="page-link"
+                                   href="?page={{ numero }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}">
+                                    {{ numero }}
+                                </a>
+                            </li>
+                        {% endfor %}
 
-                    <a href="#" class="data-list-page">2</a>
-                    <a href="#" class="data-list-page">3</a>
-                    <a href="#" class="data-list-page">4</a>
-                    <a href="#" class="data-list-page">5</a>
+                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                            {% if page_obj.has_next %}
+                                <a class="page-link"
+                                   href="?page={{ page_obj.next_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                                   aria-label="Próxima página">
+                                    &rsaquo;
+                                </a>
+                            {% else %}
+                                <span class="page-link">&rsaquo;</span>
+                            {% endif %}
+                        </li>
 
-                    <span class="data-list-page-ellipsis">…</span>
-
-                    <a href="#" class="data-list-page">25</a>
-
-                    <a href="#" class="data-list-page"
-                       aria-label="Próxima página">
-                        <i class="ti ti-chevron-right" aria-hidden="true"></i>
-                    </a>
+                    </ul>
                 </nav>
-
             </div>
 
         </footer>

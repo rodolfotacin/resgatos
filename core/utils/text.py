@@ -27,7 +27,6 @@ def get_initials(name: str) -> str:
     return initials[0].upper() + initials[1].lower()
 
 
-
 def get_telefone(value: str) -> str:
     if not value:
         return ''
@@ -42,5 +41,20 @@ def get_telefone(value: str) -> str:
 
     if len(numeros) == 10:
         return f'({numeros[:2]}) {numeros[2:6]}-{numeros[6:]}'
+
+    return value
+
+
+def get_cpf(value: str) -> str:
+    if not value:
+        return ''
+
+    numeros = ''.join(
+        char for char in str(value)
+        if char.isdigit()
+    )
+
+    if len(numeros) == 11:
+        return f'{numeros[:3]}.{numeros[3:6]}.{numeros[6:9]}-{numeros[9:]}'
 
     return value

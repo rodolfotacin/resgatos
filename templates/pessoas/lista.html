@@ -29,7 +29,7 @@
         </div>
 
         <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
-            <a href="#">
+            <a href="{% url 'inicio' %}">
                 <i class="ti ti-home" aria-hidden="true"></i>
                 Início
             </a>
@@ -250,44 +250,66 @@
                     </form>
                 </div>
 
-                <nav aria-label="Paginação de pessoas">
-                    <ul class="pagination mb-0">
+                <nav class="data-list-pagination"
+                     aria-label="Paginação de pessoas">
 
-                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-                            {% if page_obj.has_previous %}
-                                <a class="page-link"
-                                   href="?page={{ page_obj.previous_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
-                                   aria-label="Página anterior">
-                                    &lsaquo;
-                                </a>
-                            {% else %}
-                                <span class="page-link">&lsaquo;</span>
-                            {% endif %}
-                        </li>
+                    {# Página anterior #}
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                           class="data-list-page"
+                           aria-label="Página anterior">
+                            <i class="ti ti-chevron-left" aria-hidden="true"></i>
+                        </a>
+                    {% else %}
+                        <a href="#"
+                           class="data-list-page data-list-page-disabled"
+                           aria-label="Página anterior"
+                           aria-disabled="true"
+                           tabindex="-1">
+                            <i class="ti ti-chevron-left" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
 
-                        {% for numero in paginator.page_range %}
-                            <li class="page-item {% if numero == page_obj.number %}active{% endif %}">
-                                <a class="page-link"
-                                   href="?page={{ numero }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}">
-                                    {{ numero }}
-                                </a>
-                            </li>
-                        {% endfor %}
+                    {# Números das páginas #}
+                    {% for numero in paginator.page_range %}
 
-                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-                            {% if page_obj.has_next %}
-                                <a class="page-link"
-                                   href="?page={{ page_obj.next_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
-                                   aria-label="Próxima página">
-                                    &rsaquo;
-                                </a>
-                            {% else %}
-                                <span class="page-link">&rsaquo;</span>
-                            {% endif %}
-                        </li>
+                        {% if numero <= 5 or numero == paginator.num_pages or numero >= page_obj.number|add:"-1" and numero <= page_obj.number|add:"1" %}
 
-                    </ul>
+                            <a href="?page={{ numero }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                               class="data-list-page{% if numero == page_obj.number %} data-list-page-active{% endif %}"
+                               {% if numero == page_obj.number %}aria-current="page"{% endif %}>
+                                {{ numero }}
+                            </a>
+
+                        {% elif numero == 6 and page_obj.number > 4 %}
+                            <span class="data-list-page-ellipsis">…</span>
+
+                        {% elif numero == paginator.num_pages|add:"-1" and page_obj.number < paginator.num_pages|add:"-3" %}
+                            <span class="data-list-page-ellipsis">…</span>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                    {# Próxima página #}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                           class="data-list-page"
+                           aria-label="Próxima página">
+                            <i class="ti ti-chevron-right" aria-hidden="true"></i>
+                        </a>
+                    {% else %}
+                        <a href="#"
+                           class="data-list-page data-list-page-disabled"
+                           aria-label="Próxima página"
+                           aria-disabled="true"
+                           tabindex="-1">
+                            <i class="ti ti-chevron-right" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+
                 </nav>
+
             </div>
 
         </footer>

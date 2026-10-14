@@ -36,6 +36,10 @@ def get_telefone(value: str) -> str:
         if char.isdigit()
     )
 
+    # Remove o código do Brasil, quando presente
+    if numeros.startswith('55') and len(numeros) in (12, 13):
+        numeros = numeros[2:]
+
     if len(numeros) == 11:
         return f'({numeros[:2]}) {numeros[2:7]}-{numeros[7:]}'
 

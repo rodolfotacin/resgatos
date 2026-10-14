@@ -7,4 +7,5 @@ app_name = 'pessoas'
 
 urlpatterns = [
     path('lista/', views.lista, name='lista'),
+    path('adicionar/', views.adicionar, name='adicionar'),
 ]

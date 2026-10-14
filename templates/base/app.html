@@ -196,14 +196,27 @@
 
         <!-- CONTENT -->
         <main class="resgatos-content">
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible" role="alert">
+                        {{ message }}
+                        <a class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></a>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
             {% block content %}{% endblock %}
         </main>
 
     </div>
 </div>
 
+<script src="{% static 'js/vendor/jquery-4.0.0.min.js' %}"></script>
+<script src="{% static 'js/vendor/jquery.mask.min.js' %}"></script>
 <script src="{% static 'vendor/tabler/js/tabler.js' %}"></script>
-<script src=""></script>
+
+{% block scripts %}{% endblock %}
 
 </body>
 </html>

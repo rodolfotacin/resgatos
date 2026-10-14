@@ -41,12 +41,18 @@
             </a>
 
             <span aria-hidden="true">/</span>
-            <span>Adicionar Pessoa</span>
+            <span>
+                {% if pessoa %}
+                    Editar Pessoa
+                {% else %}
+                    Adicionar Pessoa
+                {% endif %}
+            </span>
 
         </nav>
     </header>
 
-    <form method="post">
+    <form method="post" data-modo="{% if pessoa %}editar{% else %}adicionar{% endif %}">
         {% csrf_token %}
 
         <!-- Dados cadastrais -->
@@ -364,7 +370,7 @@
                 </div>
 
                 <!-- Campos de acesso -->
-                <div id="campos-acesso" class="row g-3" >
+                <div id="campos-acesso" class="row g-3" {% if not possui_acesso %}hidden{% endif %}>
 
                     <!-- Senha -->
                     <div class="col-md-6">
@@ -378,6 +384,7 @@
                             id="senha"
                             name="senha"
                             minlength="8"
+                            placeholder="••••••••"
                             autocomplete="new-password"
                             disabled
                         >
@@ -399,6 +406,7 @@
                             id="confirmar_senha"
                             name="confirmar_senha"
                             minlength="8"
+                            placeholder="••••••••"
                             autocomplete="new-password"
                             disabled
                         >
@@ -431,7 +439,7 @@
                                     type="radio"
                                     name="usuario_is_active"
                                     value="false"
-                                    {% if not usuario_is_active %}checked{% endif %}
+                                    {% if usuario and not usuario_is_active %}checked{% endif %}
                                 >
                                 <span class="form-check-label">
                                     Desabilitado

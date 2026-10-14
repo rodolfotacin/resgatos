@@ -1,4 +1,4 @@
-// Máscaras e funcionalidades do formulário
+ // Máscaras e funcionalidades do formulário
 
 $(document).ready(function () {
 
@@ -45,15 +45,14 @@ $(document).ready(function () {
                     return;
                 }
 
-                // Preenche os campos do endereço
-                const campos = {
+                const camposEndereco = {
                     endereco: dados.logradouro,
                     bairro: dados.bairro,
                     cidade: dados.localidade,
                     estado: dados.uf
                 };
 
-                Object.entries(campos).forEach(([nome, valor]) => {
+                Object.entries(camposEndereco).forEach(([nome, valor]) => {
                     const campo = document.querySelector(
                         `[name="${nome}"]`
                     );
@@ -75,74 +74,74 @@ $(document).ready(function () {
     }
 
     // Telefone - intl-tel-input
-    const inputElement = document.querySelector(".js-telefone");
-    if (!inputElement) return;
+    const inputTelefone = document.querySelector('.js-telefone');
 
-    const iti = window.intlTelInput(inputElement, {
-        initialCountry: "br",
-        preferredCountries:[
-            "br",
-            "pt",
-            "us"
-        ],
-        separateDialCode: true,
-        countryNameLocale: "pt",
-        loadUtils: () => import('/static/vendor/intl-tel-input/js/utils.js')
-    });
-
-
-    // Formata dados do telefone para persistencia
-    const formulario = inputElement.form;
-
-    if (formulario) {
-        formulario.addEventListener('submit', async function () {
-            try {
-                if (iti.promise) {
-                    await iti.promise;
-                }
-
-                if (iti.isValidNumber()) {
-                    inputElement.value = iti.getNumber();
-                }
-            } catch (erro) {
-                console.error('Erro ao preparar o telefone:', erro);
-            }
+    if (inputTelefone && window.intlTelInput) {
+        const iti = window.intlTelInput(inputTelefone, {
+            initialCountry: 'br',
+            preferredCountries: ['br', 'pt', 'us'],
+            separateDialCode: true,
+            countryNameLocale: 'pt',
+            loadUtils: () => import(
+                '/static/vendor/intl-tel-input/js/utils.js'
+            )
         });
+
+        const formularioTelefone = inputTelefone.form;
+
+        if (formularioTelefone) {
+            formularioTelefone.addEventListener('submit', async function () {
+                try {
+                    if (iti.promise) {
+                        await iti.promise;
+                    }
+
+                    if (iti.isValidNumber()) {
+                        inputTelefone.value = iti.getNumber();
+                    }
+                } catch (erro) {
+                    console.error(
+                        'Erro ao preparar o telefone:',
+                        erro
+                    );
+                }
+            });
+        }
     }
 
 
     // Acesso ao sistema
+    const formularioAcesso = document.querySelector('form[data-modo]');
     const checkboxAcesso = document.querySelector('#possui_acesso');
     const camposAcesso = document.querySelector('#campos-acesso');
 
-    if (checkboxAcesso && camposAcesso) {
+    if (formularioAcesso && checkboxAcesso && camposAcesso) {
         const campos = camposAcesso.querySelectorAll('input');
-
-        const radiosStatus = camposAcesso.querySelectorAll(
-            'input[name="usuario_is_active"]'
-        );
 
         function atualizarCamposAcesso() {
             const possuiAcesso = checkboxAcesso.checked;
 
-            // Exibe ou oculta os campos
             camposAcesso.hidden = !possuiAcesso;
 
-            // Habilita ou desabilita os campos
-            campos.forEach(function (campo) {
+            campos.forEach(campo => {
                 campo.disabled = !possuiAcesso;
-            });
-
-            // Sincroniza o status do acesso
-            radiosStatus.forEach(function (radio) {
-                radio.checked = radio.value === String(possuiAcesso);
             });
         }
 
-        checkboxAcesso.addEventListener(
-            'change',
-            atualizarCamposAcesso
-        );
+        checkboxAcesso.addEventListener('change', function () {
+            if (checkboxAcesso.checked) {
+                // Ao conceder acesso, seleciona Habilitado.
+                const radioHabilitado = camposAcesso.querySelector(
+                    'input[name="usuario_is_active"][value="true"]'
+                );
+
+                if (radioHabilitado) {
+                    radioHabilitado.checked = true;
+                }
+            }
+
+            atualizarCamposAcesso();
+        });
 
         atualizarCamposAcesso();
     }

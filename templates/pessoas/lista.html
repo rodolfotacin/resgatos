@@ -187,11 +187,23 @@
                                        aria-label="Editar pessoa">
                                         <i class="ti ti-pencil" aria-hidden="true"></i>
                                     </a>
-                                    <a href="#"
-                                       class="btn btn-outline-secondary btn-icon" title="Excluir/desativar registro"
-                                       aria-label="Excluir/desativar pessoa">
-                                        <i class="ti ti-trash" aria-hidden="true"></i>
-                                    </a>
+                                    <form
+                                        method="post"
+                                        action="{% url 'pessoas:inativar' pessoa.id %}"
+                                        class="d-inline js-form-inativar"
+                                        data-nome="{{ pessoa.nome }}"
+                                    >
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-icon btn-outline-secondary js-inativar"
+                                            title="Inativar pessoa"
+                                            aria-label="Inativar pessoa"
+                                        >
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </td>
 

@@ -183,7 +183,7 @@ def adicionar(request):
 
         messages.success(
             request,
-            'Pessoa cadastrada com sucesso.'
+            'Cadastro efetuado com sucesso.'
         )
         return redirect('pessoas:lista')
 
@@ -374,7 +374,7 @@ def editar(request, pessoa_id):
 
             messages.success(
                 request,
-                'Pessoa atualizada com sucesso.'
+                'Cadastro atualizado com sucesso.'
             )
             return redirect('pessoas:lista')
 
@@ -414,9 +414,38 @@ def editar(request, pessoa_id):
             'pessoa': pessoa,
             'dados': dados,
             'usuario': usuario,
-            'possui_acesso': usuario is not None,
+            'possui_acesso': (
+                    usuario is not None and usuario.is_active
+            ),
             'usuario_is_active': (
                 usuario.is_active if usuario else False
             ),
         }
     )
+
+
+@login_required
+def inativar(request, pessoa_id):
+    if request.method != 'POST':
+        return redirect('pessoas:lista')
+
+    pessoa = get_object_or_404(
+        Pessoa,
+        pk=pessoa_id,
+        is_active=True,
+    )
+
+    with transaction.atomic():
+        pessoa.is_active = False
+        pessoa.save(update_fields=['is_active', 'updated_at'])
+
+        Usuario.objects.filter(
+            pessoa=pessoa
+        ).update(is_active=False)
+
+    messages.success(
+        request,
+        'Cadastro excluído com sucesso.'
+    )
+
+    return redirect('pessoas:lista')

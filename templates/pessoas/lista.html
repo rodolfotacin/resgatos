@@ -135,7 +135,6 @@
                     <th scope="col">Nome</th>
                     <th scope="col" class="text-center">Telefone(s)</th>
                     <th scope="col">Pet(s)</th>
-                    <th scope="col" class="text-center">Situação</th>
                     <th scope="col" class="text-center"></th>
                 </tr>
                 </thead>
@@ -168,34 +167,31 @@
                             <td>
                                 {% for vinculo in pessoa.vinculos_pets.all %}
                                     {% if not vinculo.data_fim %}
-                                        <a href="#">{{ vinculo.pet.nome }}</a>
+                                        {{ vinculo.tipo_relacao }} de
+                                        <a href="#">{{ vinculo.pet.nome }}</a><br>
                                     {% endif %}
                                 {% empty %}
                                     <span class="text-secondary">Nenhum pet relacionado</span>
                                 {% endfor %}
                             </td>
 
-                            <td class="text-center">
-                                    <span class="badge bg-green-lt">
-                                        <i class="resgatos-circle-filled"></i>
-                                        {{ pessoa.is_active|yesno:"Ativo,Inativo" }}
-                                    </span>
-                            </td>
-
                             <td>
                                 <div class="resgatos-row-actions">
                                     <a href="#"
-                                       class="btn btn-outline-secondary btn-icon"
-                                       aria-label="Editar pessoa">
-                                        <i class="ti ti-pencil"
-                                           aria-hidden="true"></i>
+                                       class="btn btn-outline-secondary btn-icon" title="Associar Pet"
+                                       aria-label="Associar pet">
+                                        <i class="ti ti-cat" aria-hidden="true"></i>
                                     </a>
-                                    <button type="button"
-                                            class="btn btn-outline-secondary btn-icon"
-                                            aria-label="Mais opções">
-                                        <i class="ti ti-trash"
-                                           aria-hidden="true"></i>
-                                    </button>
+                                    <a href="{% url 'pessoas:editar' pessoa.id %}"
+                                       class="btn btn-outline-secondary btn-icon" title="Ver/Editar cadastro"
+                                       aria-label="Editar pessoa">
+                                        <i class="ti ti-pencil" aria-hidden="true"></i>
+                                    </a>
+                                    <a href="#"
+                                       class="btn btn-outline-secondary btn-icon" title="Excluir/desativar registro"
+                                       aria-label="Excluir/desativar pessoa">
+                                        <i class="ti ti-trash" aria-hidden="true"></i>
+                                    </a>
                                 </div>
                             </td>
 

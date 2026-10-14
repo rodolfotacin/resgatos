@@ -55,9 +55,9 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    color: var(--resgatos-text-muted, #667085);
     flex-wrap: wrap;
     gap: 0.5rem;
-    color: var(--resgatos-text-muted, #667085);
     font-size: 0.8125rem;
 }
 
@@ -446,6 +446,18 @@
     justify-content: center;
     min-width: 28px;
     color: var(--resgatos-text-muted, #667085);
+}
+
+
+/* PEOPLE FORM */
+.iti {
+    display: block;
+    width: 100%;
+}
+
+.iti input[type="tel"] {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 

@@ -6,8 +6,9 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
+from django.shortcuts import get_object_or_404
 
-from .models import Pessoa
+from .models import Pessoa, Usuario
 
 
 def login_view(request):
@@ -60,9 +61,9 @@ def lista(request):
     if por_pagina not in (10, 20, 50, 100):
         por_pagina = 20
 
-    pessoas = Pessoa.objects.prefetch_related(
-        'vinculos_pets__pet'
-    ).all()
+    pessoas = Pessoa.objects.filter(
+        is_active=True
+    ).prefetch_related('vinculos_pets__pet')
 
     if busca:
         pessoas = pessoas.filter(
@@ -105,10 +106,18 @@ def adicionar(request):
         'bairro': request.POST.get('bairro', '').strip(),
         'cidade': request.POST.get('cidade', '').strip(),
         'estado': request.POST.get('estado', '').strip(),
+        'is_active': request.POST.get('is_active') == 'true',
         'is_attendance_responsible': (
             request.POST.get('is_attendance_responsible') == 'on'
         ),
     }
+
+    possui_acesso = request.POST.get('possui_acesso') == '1'
+    senha = request.POST.get('senha', '')
+    confirmar_senha = request.POST.get('confirmar_senha', '')
+    usuario_is_active = (
+        request.POST.get('usuario_is_active') == 'true'
+    )
 
     obrigatorios = [
         'nome', 'cpf', 'email', 'telefone', 'cep',
@@ -126,14 +135,56 @@ def adicionar(request):
             {'dados': dados}
         )
 
-    try:
-        with transaction.atomic():
-            Pessoa.objects.create(
-                **dados,
-                is_active=True
+    if possui_acesso:
+        if not senha:
+            messages.error(
+                request,
+                'Informe a senha para criar o acesso ao sistema.'
+            )
+            return render(
+                request,
+                'pessoas/formulario.html',
+                {'dados': dados}
             )
 
-        messages.success(request, 'Pessoa cadastrada com sucesso!')
+        if senha != confirmar_senha:
+            messages.error(
+                request,
+                'A senha e a confirmação não coincidem.'
+            )
+            return render(
+                request,
+                'pessoas/formulario.html',
+                {'dados': dados}
+            )
+
+        if len(senha) < 8:
+            messages.error(
+                request,
+                'A senha deve possuir pelo menos 8 caracteres.'
+            )
+            return render(
+                request,
+                'pessoas/formulario.html',
+                {'dados': dados}
+            )
+
+    try:
+        with transaction.atomic():
+            pessoa = Pessoa.objects.create(**dados)
+
+            if possui_acesso:
+                usuario = Usuario(
+                    pessoa=pessoa,
+                    is_active=usuario_is_active,
+                )
+                usuario.set_password(senha)
+                usuario.save()
+
+        messages.success(
+            request,
+            'Pessoa cadastrada com sucesso.'
+        )
         return redirect('pessoas:lista')
 
     except IntegrityError:
@@ -142,9 +193,230 @@ def adicionar(request):
             'Não foi possível cadastrar. Verifique se o CPF, '
             'e-mail ou telefone já está cadastrado.'
         )
-
         return render(
             request,
             'pessoas/formulario.html',
             {'dados': dados}
         )
+
+
+@login_required
+def editar(request, pessoa_id):
+    pessoa = get_object_or_404(Pessoa, pk=pessoa_id)
+
+    usuario = Usuario.objects.filter(pessoa=pessoa).first()
+
+    if request.method == 'POST':
+        dados = {
+            'nome': request.POST.get('nome', '').strip(),
+            'cpf': request.POST.get('cpf', '').strip(),
+            'email': request.POST.get('email', '').strip(),
+            'telefone': request.POST.get('telefone', '').strip(),
+            'cep': request.POST.get('cep', '').strip(),
+            'endereco': request.POST.get('endereco', '').strip(),
+            'numero': request.POST.get('numero', '').strip(),
+            'complemento': request.POST.get('complemento', '').strip() or None,
+            'bairro': request.POST.get('bairro', '').strip(),
+            'cidade': request.POST.get('cidade', '').strip(),
+            'estado': request.POST.get('estado', '').strip(),
+            'is_active': request.POST.get('is_active') == 'true',
+            'is_attendance_responsible': (
+                request.POST.get('is_attendance_responsible') == 'on'
+            ),
+        }
+
+        possui_acesso = request.POST.get('possui_acesso') == '1'
+        senha = request.POST.get('senha', '')
+        confirmar_senha = request.POST.get('confirmar_senha', '')
+        usuario_is_active = (
+            request.POST.get('usuario_is_active') == 'true'
+        )
+
+        obrigatorios = [
+            'nome', 'cpf', 'email', 'telefone', 'cep',
+            'endereco', 'numero', 'bairro', 'cidade', 'estado',
+        ]
+
+        if any(not dados[campo] for campo in obrigatorios):
+            messages.error(
+                request,
+                'Preencha todos os campos obrigatórios.'
+            )
+            return render(
+                request,
+                'pessoas/formulario.html',
+                {
+                    'pessoa': pessoa,
+                    'dados': dados,
+                    'usuario': usuario,
+                    'possui_acesso': possui_acesso,
+                    'usuario_is_active': usuario_is_active,
+                }
+            )
+
+        if possui_acesso and usuario is None:
+            if not senha:
+                messages.error(
+                    request,
+                    'Informe uma senha para criar o acesso.'
+                )
+                return render(
+                    request,
+                    'pessoas/formulario.html',
+                    {
+                        'pessoa': pessoa,
+                        'dados': dados,
+                        'usuario': usuario,
+                        'possui_acesso': possui_acesso,
+                        'usuario_is_active': usuario_is_active,
+                    }
+                )
+
+            if senha != confirmar_senha:
+                messages.error(
+                    request,
+                    'A senha e a confirmação não coincidem.'
+                )
+                return render(
+                    request,
+                    'pessoas/formulario.html',
+                    {
+                        'pessoa': pessoa,
+                        'dados': dados,
+                        'usuario': usuario,
+                        'possui_acesso': possui_acesso,
+                        'usuario_is_active': usuario_is_active,
+                    }
+                )
+
+            if len(senha) < 8:
+                messages.error(
+                    request,
+                    'A senha deve possuir pelo menos 8 caracteres.'
+                )
+                return render(
+                    request,
+                    'pessoas/formulario.html',
+                    {
+                        'pessoa': pessoa,
+                        'dados': dados,
+                        'usuario': usuario,
+                        'possui_acesso': possui_acesso,
+                        'usuario_is_active': usuario_is_active,
+                    }
+                )
+
+        elif possui_acesso and senha:
+            if senha != confirmar_senha:
+                messages.error(
+                    request,
+                    'A senha e a confirmação não coincidem.'
+                )
+                return render(
+                    request,
+                    'pessoas/formulario.html',
+                    {
+                        'pessoa': pessoa,
+                        'dados': dados,
+                        'usuario': usuario,
+                        'possui_acesso': possui_acesso,
+                        'usuario_is_active': usuario_is_active,
+                    }
+                )
+
+            if len(senha) < 8:
+                messages.error(
+                    request,
+                    'A senha deve possuir pelo menos 8 caracteres.'
+                )
+                return render(
+                    request,
+                    'pessoas/formulario.html',
+                    {
+                        'pessoa': pessoa,
+                        'dados': dados,
+                        'usuario': usuario,
+                        'possui_acesso': possui_acesso,
+                        'usuario_is_active': usuario_is_active,
+                    }
+                )
+
+        try:
+            with transaction.atomic():
+                for campo, valor in dados.items():
+                    setattr(pessoa, campo, valor)
+
+                pessoa.save()
+
+                if usuario:
+                    # Não exclui o usuário existente.
+                    # Desmarcar "Possui acesso" suspende o login.
+                    usuario.is_active = (
+                        possui_acesso
+                        and usuario_is_active
+                        and pessoa.is_active
+                    )
+
+                    if possui_acesso and senha:
+                        usuario.set_password(senha)
+
+                    usuario.save()
+
+                elif possui_acesso:
+                    usuario = Usuario(
+                        pessoa=pessoa,
+                        is_active=(
+                            usuario_is_active and pessoa.is_active
+                        ),
+                    )
+                    usuario.set_password(senha)
+                    usuario.save()
+
+            messages.success(
+                request,
+                'Pessoa atualizada com sucesso.'
+            )
+            return redirect('pessoas:lista')
+
+        except IntegrityError:
+            messages.error(
+                request,
+                'Não foi possível atualizar. Verifique se o CPF, '
+                'e-mail ou telefone já pertence a outra pessoa.'
+            )
+
+            return render(
+                request,
+                'pessoas/formulario.html',
+                {
+                    'pessoa': pessoa,
+                    'dados': dados,
+                    'usuario': usuario,
+                    'possui_acesso': possui_acesso,
+                    'usuario_is_active': usuario_is_active,
+                }
+            )
+
+    dados = {
+        campo: getattr(pessoa, campo)
+        for campo in [
+            'nome', 'cpf', 'email', 'telefone', 'cep',
+            'endereco', 'numero', 'complemento', 'bairro',
+            'cidade', 'estado', 'is_active',
+            'is_attendance_responsible',
+        ]
+    }
+
+    return render(
+        request,
+        'pessoas/formulario.html',
+        {
+            'pessoa': pessoa,
+            'dados': dados,
+            'usuario': usuario,
+            'possui_acesso': usuario is not None,
+            'usuario_is_active': (
+                usuario.is_active if usuario else False
+            ),
+        }
+    )

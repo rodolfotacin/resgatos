@@ -91,7 +91,7 @@ $(document).ready(function () {
     });
 
 
-
+    // Formata dados do telefone para persistencia
     const formulario = inputElement.form;
 
     if (formulario) {
@@ -109,5 +109,43 @@ $(document).ready(function () {
             }
         });
     }
+
+
+    // Acesso ao sistema
+    const checkboxAcesso = document.querySelector('#possui_acesso');
+    const camposAcesso = document.querySelector('#campos-acesso');
+
+    if (checkboxAcesso && camposAcesso) {
+        const campos = camposAcesso.querySelectorAll('input');
+
+        const radiosStatus = camposAcesso.querySelectorAll(
+            'input[name="usuario_is_active"]'
+        );
+
+        function atualizarCamposAcesso() {
+            const possuiAcesso = checkboxAcesso.checked;
+
+            // Exibe ou oculta os campos
+            camposAcesso.hidden = !possuiAcesso;
+
+            // Habilita ou desabilita os campos
+            campos.forEach(function (campo) {
+                campo.disabled = !possuiAcesso;
+            });
+
+            // Sincroniza o status do acesso
+            radiosStatus.forEach(function (radio) {
+                radio.checked = radio.value === String(possuiAcesso);
+            });
+        }
+
+        checkboxAcesso.addEventListener(
+            'change',
+            atualizarCamposAcesso
+        );
+
+        atualizarCamposAcesso();
+    }
+
 
 });

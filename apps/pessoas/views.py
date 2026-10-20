@@ -65,6 +65,8 @@ def lista(request):
 
     pessoas = Pessoa.objects.filter(
         is_active=True
+    ).exclude(
+        id=request.user.pessoa_id
     ).prefetch_related('vinculos_pets__pet')
 
     if busca:
@@ -210,6 +212,9 @@ def editar(request, pessoa_id):
     pessoa = get_object_or_404(Pessoa, pk=pessoa_id)
 
     usuario = Usuario.objects.filter(pessoa=pessoa).first()
+    eh_proprio_perfil = (
+        pessoa.id == request.user.pessoa_id
+    )
 
     if request.method == 'POST':
         dados = {
@@ -349,6 +354,9 @@ def editar(request, pessoa_id):
         try:
             with transaction.atomic():
                 for campo, valor in dados.items():
+                    if campo == 'is_active' and eh_proprio_perfil:
+                        continue
+
                     setattr(pessoa, campo, valor)
 
                 pessoa.save()
@@ -356,11 +364,12 @@ def editar(request, pessoa_id):
                 if usuario:
                     # Não exclui o usuário existente.
                     # Desmarcar "Possui acesso" suspende o login.
-                    usuario.is_active = (
-                        possui_acesso
-                        and usuario_is_active
-                        and pessoa.is_active
-                    )
+                    if not eh_proprio_perfil:
+                        usuario.is_active = (
+                            possui_acesso
+                            and usuario_is_active
+                            and pessoa.is_active
+                        )
 
                     if possui_acesso and senha:
                         usuario.set_password(senha)

@@ -1,11 +1,359 @@
 {% extends 'base/app.html' %}
+{% load static %}
+{% load text_tags %}
 
-{% block title %}Início | Resgatos{% endblock %}
+{% block title %}Pets | Resgatos{% endblock %}
 
 {% block content %}
-    <div class="page-header mb-3">
-        <h1 class="page-title">Início</h1>
-    </div>
 
-    <p>Listagem de pets</p>
+<link rel="stylesheet" href="{% static 'vendor/tabler/css/tabler-icons.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/list.css' %}">
+
+<div class="resgatos-page resgatos-pets">
+
+    <!-- Cabeçalho da página -->
+    <header class="resgatos-page-header">
+
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-cat"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">Pets</h1>
+                <p class="resgatos-page-description">
+                    Cadastro e acompanhamento dos animais resgatados
+                </p>
+            </div>
+        </div>
+
+        <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
+            <a href="{% url 'inicio' %}">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+
+            <span aria-hidden="true">/</span>
+            <span>Pets</span>
+        </nav>
+
+    </header>
+
+    <!-- Filtros da listagem -->
+    <section class="resgatos-filter card" aria-label="Filtros de pets">
+        <div class="card-body">
+
+            <form method="get" action="{% url 'pets:lista' %}"
+                  class="resgatos-filter-form">
+
+                <div class="resgatos-search-row">
+
+                    <div class="resgatos-search-input">
+                        <label for="pet-search" class="visually-hidden">
+                            Pesquisar pets
+                        </label>
+
+                        <i class="ti ti-search me-1" aria-hidden="true"></i>
+
+                        <input
+                            type="search"
+                            id="pet-search"
+                            name="busca"
+                            class="form-control"
+                            placeholder="Pesquisar por Nome, Microchip ou Pessoa relacionada..."
+                            value="{{ busca }}"
+                        >
+
+                        <input
+                            type="hidden"
+                            name="por_pagina"
+                            value="{{ por_pagina }}"
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-search me-1"></i>
+                        Buscar
+                    </button>
+
+                    <a href="{% url 'pets:lista' %}"
+                       class="btn btn-outline-secondary">
+                        <i class="ti ti-refresh me-1"></i>
+                        Limpar filtros
+                    </a>
+
+                </div>
+            </form>
+
+            {% if busca %}
+                <div class="alert alert-primary"
+                     style="margin-top: 20px"
+                     role="status">
+                    <i class="ti ti-filter me-2"></i>
+                    <strong>Filtro ativo:</strong>
+                    resultados para <strong>"{{ busca }}"</strong>.
+                </div>
+            {% endif %}
+
+        </div>
+    </section>
+
+    <!-- Listagem de pets -->
+    <section class="resgatos-list-card card">
+
+        <div class="resgatos-list-header">
+            <div class="data-list-heading">
+                <h2 class="data-list-title">Pets cadastrados</h2>
+
+                <p class="data-list-count">
+                    Exibindo {{ page_obj.start_index }}-{{ page_obj.end_index }}
+                    de {{ paginator.count }} pets
+                </p>
+            </div>
+
+            <div class="resgatos-page-actions">
+                <a href="#"
+                   class="btn btn-primary"
+                   aria-label="Adicionar pet">
+                    <i class="ti ti-plus me-1" aria-hidden="true"></i>
+                    Adicionar Pet
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-vcenter resgatos-pets-table">
+
+                <thead>
+                    <tr>
+                        <th scope="col" class="resgatos-col-photo"></th>
+                        <th scope="col">Pet</th>
+                        <th scope="col" class="text-center">Microchip</th>
+                        <th scope="col" class="text-center">Sexo</th>
+                        <th scope="col">Situação atual</th>
+                        <th scope="col">Pessoa relacionada</th>
+                        <th scope="col" class="text-center"></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for pet in pets %}
+                        <tr>
+
+                            <!-- Foto circular e identificação -->
+                            <td>
+                                {% if pet.foto %}
+                                    <a
+                                        href="{{ pet.foto.url }}"
+                                        data-fancybox="pets"
+                                        data-caption="{{ pet.nome }}"
+                                        aria-label="Ampliar foto de {{ pet.nome }}"
+                                    >
+                                        <img
+                                            src="{{ pet.foto.url }}"
+                                            alt="Foto de {{ pet.nome }}"
+                                            class="resgatos-pet-photo"
+                                            loading="lazy"
+                                        >
+                                    </a>
+                                {% else %}
+                                    <div class="resgatos-pet-avatar"
+                                         aria-label="Pet sem foto">
+                                        <i class="ti ti-cat"
+                                           aria-hidden="true"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <a href="#"
+                                   class="resgatos-people-name">
+                                    {{ pet.nome }}
+                                </a>
+
+                                <div class="resgatos-people-meta">
+                                    {{ pet.especie }}
+                                    {% if pet.raca %} · {{ pet.raca }}{% endif %}
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                {% if pet.microchip %}
+                                    {{ pet.microchip }}
+                                {% else %}
+                                    Não informado
+                                {% endif %}
+                            </td>
+
+                            <td class="text-center">
+                                {% if pet.sexo == 'M' %}
+                                    Macho
+                                {% elif pet.sexo == 'F' %}
+                                    Fêmea
+                                {% else %}
+                                    Não informado
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if pet.situacao_atual %}
+                                    {{ pet.situacao_atual.situacao }}
+                                {% else %}
+                                    <span class="text-secondary">
+                                        Não informada
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% for vinculo in pet.vinculos_atuais %}
+                                    <div>
+                                        <a href="{% url 'pessoas:editar' vinculo.pessoa.id %}">
+                                            {{ vinculo.pessoa.nome }}
+                                        </a>
+                                        ({{ vinculo.get_tipo_relacao_display|default:vinculo.tipo_relacao }})
+                                    </div>
+                                {% empty %}
+                                    <span class="text-secondary">
+                                        Nenhuma pessoa relacionada
+                                    </span>
+                                {% endfor %}
+                            </td>
+
+                            <!-- Ações -->
+                            <td>
+                                <div class="resgatos-row-actions">
+
+                                    <a href="#"
+                                       class="btn btn-outline-secondary btn-icon"
+                                       title="Ver/Editar cadastro"
+                                       aria-label="Editar pet">
+                                        <i class="ti ti-pencil"
+                                           aria-hidden="true"></i>
+                                    </a>
+
+                                    <form
+                                        method="post"
+                                        action="#"
+                                        class="d-inline js-form-inativar"
+                                        data-nome="{{ pet.nome }}"
+                                    >
+                                        {% csrf_token %}
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-icon btn-outline-secondary js-inativar"
+                                            title="Excluir pet"
+                                            aria-label="Excluir pet"
+                                        >
+                                            <i class="ti ti-trash"
+                                               aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="resgatos-empty-state">
+                                <i class="ti ti-cat" aria-hidden="true"></i>
+                                <p>Nenhum pet encontrado.</p>
+                                <span>
+                                    Ajuste os filtros ou cadastre um novo pet.
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        <!-- Paginação -->
+        <footer class="resgatos-list-footer">
+            <div class="data-list-footer">
+
+                <div class="data-list-page-size">
+                    <form method="get"
+                          class="d-inline-flex align-items-center gap-2">
+
+                        <input type="hidden"
+                               name="busca"
+                               value="{{ busca }}">
+
+                        <label for="por_pagina">Exibir</label>
+
+                        <select
+                            name="por_pagina"
+                            id="por_pagina"
+                            class="form-select"
+                            onchange="this.form.submit()"
+                        >
+                            <option value="10" {% if por_pagina == 10 %}selected{% endif %}>10</option>
+                            <option value="20" {% if por_pagina == 20 %}selected{% endif %}>20</option>
+                            <option value="50" {% if por_pagina == 50 %}selected{% endif %}>50</option>
+                            <option value="100" {% if por_pagina == 100 %}selected{% endif %}>100</option>
+                        </select>
+
+                        <span>itens por página</span>
+                    </form>
+                </div>
+
+                <nav class="data-list-pagination"
+                     aria-label="Paginação de pets">
+
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                           class="data-list-page"
+                           aria-label="Página anterior">
+                            <i class="ti ti-chevron-left"
+                               aria-hidden="true"></i>
+                        </a>
+                    {% else %}
+                        <span class="data-list-page data-list-page-disabled"
+                              aria-disabled="true">
+                            <i class="ti ti-chevron-left"
+                               aria-hidden="true"></i>
+                        </span>
+                    {% endif %}
+
+                    {% for numero in paginator.page_range %}
+                        {% if numero <= 5 or numero == paginator.num_pages or numero >= page_obj.number|add:"-1" and numero <= page_obj.number|add:"1" %}
+                            <a href="?page={{ numero }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                               class="data-list-page{% if numero == page_obj.number %} data-list-page-active{% endif %}"
+                               {% if numero == page_obj.number %}aria-current="page"{% endif %}>
+                                {{ numero }}
+                            </a>
+                        {% elif numero == 6 and page_obj.number > 4 %}
+                            <span class="data-list-page-ellipsis">…</span>
+                        {% elif numero == paginator.num_pages|add:"-1" and page_obj.number < paginator.num_pages|add:"-3" %}
+                            <span class="data-list-page-ellipsis">…</span>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                           class="data-list-page"
+                           aria-label="Próxima página">
+                            <i class="ti ti-chevron-right"
+                               aria-hidden="true"></i>
+                        </a>
+                    {% else %}
+                        <span class="data-list-page data-list-page-disabled"
+                              aria-disabled="true">
+                            <i class="ti ti-chevron-right"
+                               aria-hidden="true"></i>
+                        </span>
+                    {% endif %}
+
+                </nav>
+            </div>
+        </footer>
+
+    </section>
+</div>
+
 {% endblock %}

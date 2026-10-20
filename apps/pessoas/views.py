@@ -1,4 +1,3 @@
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -7,6 +6,9 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.urls import reverse
 
 from .models import Pessoa, Usuario
 
@@ -185,7 +187,10 @@ def adicionar(request):
             request,
             'Cadastro efetuado com sucesso.'
         )
-        return redirect('pessoas:lista')
+        return redirect(
+            'pessoas:editar',
+            pessoa_id=pessoa.id,
+        )
 
     except IntegrityError:
         messages.error(
@@ -376,7 +381,10 @@ def editar(request, pessoa_id):
                 request,
                 'Cadastro atualizado com sucesso.'
             )
-            return redirect('pessoas:lista')
+            return redirect(
+                'pessoas:editar',
+                pessoa_id=pessoa.id,
+            )
 
         except IntegrityError:
             messages.error(
@@ -406,6 +414,10 @@ def editar(request, pessoa_id):
             'is_attendance_responsible',
         ]
     }
+
+    reativar_pessoa = request.GET.get('reativar') == '1'
+    if reativar_pessoa:
+        dados['is_active'] = True
 
     return render(
         request,
@@ -449,3 +461,39 @@ def inativar(request, pessoa_id):
     )
 
     return redirect('pessoas:lista')
+
+
+@login_required
+@require_GET
+def consultar_cpf(request):
+    cpf = request.GET.get('cpf', '')
+    numeros = ''.join(c for c in cpf if c.isdigit())
+
+    if len(numeros) != 11:
+        return JsonResponse({
+            'encontrado': False,
+            'erro': 'CPF inválido.',
+        }, status=400)
+
+    cpf_formatado = (
+        f'{numeros[:3]}.{numeros[3:6]}.'
+        f'{numeros[6:9]}-{numeros[9:]}'
+    )
+
+    pessoa = Pessoa.objects.filter(cpf=cpf_formatado).first()
+
+    if not pessoa:
+        return JsonResponse({
+            'encontrado': False,
+        })
+
+    return JsonResponse({
+        'encontrado': True,
+        'pessoa_id': pessoa.pk,
+        'nome': pessoa.nome,
+        'is_active': pessoa.is_active,
+        'url_editar': reverse(
+            'pessoas:editar',
+            kwargs={'pessoa_id': pessoa.pk},
+        ),
+    })

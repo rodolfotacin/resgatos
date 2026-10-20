@@ -2,7 +2,7 @@
 {% load static %}
 {% load text_tags %}
 
-{% block title %}Início | Resgatos{% endblock %}
+{% block title %}Pessoas | Resgatos{% endblock %}
 
 {% block content %}
 
@@ -145,10 +145,26 @@
 
                         <tr>
 
-                            <td>
-                                <div class="resgatos-people-avatar">
-                                    <div class="alpha-init">{{ pessoa.nome|initials }}</div>
-                                </div>
+                             <td>
+                                {% if people.foto %}
+                                    <a
+                                        href="{{ people.foto.url }}"
+                                        data-fancybox="people"
+                                        data-caption="{{ people.nome }}"
+                                        aria-label="Ampliar foto de {{ people.nome }}"
+                                    >
+                                        <img
+                                            src="{{ people.foto.url }}"
+                                            alt="Foto de {{ people.nome }}"
+                                            class="resgatos-people-photo"
+                                            loading="lazy"
+                                        >
+                                    </a>
+                                {% else %}
+                                    <div class="resgatos-people-avatar" aria-label="Pessoa sem foto">
+                                        <div class="alpha-init">{{ pessoa.nome|initials }}</div>
+                                    </div>
+                                {% endif %}
                             </td>
 
                             <td>
@@ -177,11 +193,6 @@
 
                             <td>
                                 <div class="resgatos-row-actions">
-                                    <a href="#"
-                                       class="btn btn-outline-secondary btn-icon" title="Associar Pet"
-                                       aria-label="Associar pet">
-                                        <i class="ti ti-cat" aria-hidden="true"></i>
-                                    </a>
                                     <a href="{% url 'pessoas:editar' pessoa.id %}"
                                        class="btn btn-outline-secondary btn-icon" title="Ver/Editar cadastro"
                                        aria-label="Editar pessoa">

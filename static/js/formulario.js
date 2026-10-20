@@ -147,4 +147,97 @@ $(document).ready(function () {
     }
 
 
+    // Consulta de CPF ao sair do campo
+    const campoCpf = document.querySelector('#cpf');
+
+    if (campoCpf) {
+        let ultimaConsulta = '';
+
+        campoCpf.addEventListener('blur', async function () {
+            const cpf = this.value.trim();
+            const numeros = cpf.replace(/\D/g, '');
+
+            if (numeros.length !== 11 || numeros === ultimaConsulta) {
+                return;
+            }
+
+            ultimaConsulta = numeros;
+
+            try {
+                const url = new URL(
+                    campoCpf.dataset.url,
+                    window.location.origin
+                );
+
+                url.searchParams.set('cpf', numeros);
+
+                const resposta = await fetch(url);
+
+                if (!resposta.ok) {
+                    throw new Error('Falha na consulta do CPF.');
+                }
+
+                const resultado = await resposta.json();
+
+                if (!resultado.encontrado) {
+                    return;
+                }
+
+                // Não direciona para a própria tela de edição.
+                const formulario = campoCpf.closest('form');
+                const modo = formulario?.dataset.modo;
+
+                if (modo === 'editar') {
+                    return;
+                }
+
+                if (resultado.is_active) {
+                    const confirmacao = await Swal.fire({
+                        title: 'Cadastro localizado',
+                        text: `${resultado.nome} já possui cadastro. Deseja abrir a edição?`,
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonText: 'Abrir cadastro',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#263563'
+                    });
+
+                    if (confirmacao.isConfirmed) {
+                        window.location.href = resultado.url_editar;
+                    }
+
+                    return;
+                }
+
+                const confirmacao = await Swal.fire({
+                    title: 'Cadastro localizado',
+                    text: `O cadastro de ${resultado.nome} está inativo. Deseja reativá-lo?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sim, reativar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#263563'
+                });
+
+                if (confirmacao.isConfirmed) {
+                    window.location.href =
+                        resultado.url_editar + '?reativar=1';
+                } else {
+                    window.location.href = '/pessoas/lista/';
+                }
+
+            } catch (erro) {
+                console.error('Erro ao consultar CPF:', erro);
+
+                Swal.fire({
+                    title: 'Não foi possível consultar',
+                    text: 'Ocorreu um erro ao verificar o CPF. Tente novamente.',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#263563'
+                });
+            }
+        });
+    }
+
 });

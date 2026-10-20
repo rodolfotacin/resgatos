@@ -10,4 +10,6 @@ urlpatterns = [
     path('adicionar/', views.adicionar, name='adicionar'),
     path('<int:pessoa_id>/editar/', views.editar, name='editar'),
     path('<int:pessoa_id>/inativar/', views.inativar, name='inativar'),
+    path('consultar-cpf/', views.consultar_cpf, name='consultar_cpf',
+),
 ]

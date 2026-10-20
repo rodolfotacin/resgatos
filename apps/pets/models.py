@@ -13,7 +13,7 @@ class Pet(models.Model):
     data_nascimento = models.DateField(blank=True, null=True)
     porte = models.CharField(max_length=45, blank=True, null=True)
     pelagem = models.CharField(max_length=45, blank=True, null=True)
-    foto = models.CharField(max_length=150, blank=True, null=True)
+    foto = models.ImageField(upload_to='pets/', blank=True, null=True)
     observacoes = models.TextField(blank=True, null=True)
 
     class Meta:

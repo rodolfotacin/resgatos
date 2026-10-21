@@ -4,8 +4,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Prefetch, Q
+from django.urls import reverse
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
+from apps.resgates.models import Resgate
 
 from .models import Pet, PessoaPet
 
@@ -155,6 +157,11 @@ def adicionar(request):
 def editar(request, pet_id):
     pet = get_object_or_404(Pet, pk=pet_id)
 
+    aba = request.POST.get(
+        'aba',
+        request.GET.get('aba', '')
+    )
+
     dados = {
         'nome': pet.nome,
         'microchip': pet.microchip or '',
@@ -168,6 +175,11 @@ def editar(request, pet_id):
         'observacoes': pet.observacoes or '',
         'is_active': pet.is_active,
     }
+
+    resgates = Resgate.objects.filter(
+        pet=pet,
+        is_active=True
+    ).order_by('-data_resgate', '-id')
 
     if request.method == 'POST':
         dados = {
@@ -196,7 +208,11 @@ def editar(request, pet_id):
             return render(
                 request,
                 'pets/formulario.html',
-                {'pet': pet, 'dados': dados},
+                {
+                    'pet': pet,
+                    'dados': dados,
+                    'resgates': resgates,
+                },
             )
 
         try:
@@ -213,7 +229,11 @@ def editar(request, pet_id):
             return render(
                 request,
                 'pets/formulario.html',
-                {'pet': pet, 'dados': dados},
+                {
+                    'pet': pet,
+                    'dados': dados,
+                    'resgates': resgates,
+                },
             )
 
         with transaction.atomic():
@@ -246,14 +266,17 @@ def editar(request, pet_id):
             if foto_anterior:
                 foto_anterior.delete(save=False)
 
-            pet.save()
-
         messages.success(
             request,
             'Pet atualizado com sucesso.'
         )
 
-        return redirect('pets:editar', pet_id=pet.id)
+        url = reverse('pets:editar', args=[pet.id])
+
+        if aba:
+            url = f'{url}?aba={aba}'
+
+        return redirect(url)
 
     return render(
         request,
@@ -261,5 +284,6 @@ def editar(request, pet_id):
         {
             'pet': pet,
             'dados': dados,
+            'resgates': resgates,
         },
     )

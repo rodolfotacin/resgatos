@@ -8,9 +8,6 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'vendor/tabler/css/tabler-icons.min.css' %}">
-<link rel="stylesheet" href="{% static 'css/components/list.css' %}">
-
 <div class="resgatos-page resgatos-resgates">
 
     <!-- Cabeçalho -->
@@ -89,6 +86,9 @@
                                     id="pet_id"
                                     name="pet_id"
                                     required
+                                    {% if dados.pet_id %}
+                                        style="pointer-events: none; background-color: #e9ecef;">
+                                    {% endif %}
                                 >
                                     <option value="">Selecione um Pet</option>
 
@@ -191,12 +191,21 @@
 
                 <!-- Ações -->
                 <div class="d-flex justify-content-end gap-2 mb-4">
-                    <a
-                        href="{% url 'resgates:lista' %}"
-                        class="btn btn-outline-secondary"
-                    >
-                        Cancelar
-                    </a>
+                    {% if origem == 'pet' and dados.pet_id %}
+                        <a
+                            href="{% url 'pets:editar' dados.pet_id %}?aba=resgates"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancelar
+                        </a>
+                    {% else %}
+                        <a
+                            href="{% url 'resgates:lista' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancelar
+                        </a>
+                    {% endif %}
 
                     <button type="submit" class="btn btn-primary">
                         <i class="ti ti-device-floppy me-1"></i>
@@ -207,6 +216,8 @@
                             Registrar resgate
                         {% endif %}
                     </button>
+                    <input type="hidden" name="origem" value="{{ origem }}">
+                    <input type="hidden" name="contexto_pet_id" value="{{ contexto_pet_id }}">
                 </div>
 
             </form>

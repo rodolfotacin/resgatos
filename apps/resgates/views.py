@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.utils import timezone
+from django.urls import reverse
 
 from apps.pets.models import Pet
 from .models import Resgate
@@ -103,7 +104,22 @@ def dados_resgate(resgate=None):
 
 @login_required
 def adicionar(request):
+    origem = request.GET.get('origem', '')
+
+    if request.method == 'POST':
+        origem = request.POST.get('origem', '')
+
     dados = dados_resgate()
+
+    # Se o cadastro começou pelo Pet, preenche o Pet automaticamente.
+    pet_id = (
+        request.POST.get('pet_id', '').strip()
+        if request.method == 'POST'
+        else request.GET.get('pet_id', '').strip()
+    )
+
+    if pet_id:
+        dados['pet_id'] = pet_id
 
     if request.method == 'POST':
         dados = {
@@ -119,11 +135,7 @@ def adicionar(request):
             'is_active': True,
         }
 
-        obrigatorios = [
-            'pet_id',
-            'data_resgate',
-            'local',
-        ]
+        obrigatorios = ['pet_id', 'data_resgate', 'local']
 
         if any(not dados[campo] for campo in obrigatorios):
             messages.error(
@@ -136,10 +148,12 @@ def adicionar(request):
                     pk=dados['pet_id'],
                     is_active=True,
                 )
+
                 data_resgate = datetime.strptime(
                     dados['data_resgate'],
                     '%Y-%m-%dT%H:%M',
                 )
+
                 data_resgate = timezone.make_aware(
                     data_resgate,
                     timezone.get_current_timezone(),
@@ -151,17 +165,20 @@ def adicionar(request):
                     local=dados['local'],
                     descricao=dados['descricao'] or None,
                     observacoes=dados['observacoes'] or None,
-                    is_active=dados['is_active'],
+                    is_active=True,
                 )
 
                 messages.success(
                     request,
                     'Resgate registrado com sucesso.'
                 )
-                return redirect(
-                    'resgates:editar',
-                    resgate_id=resgate.id,
-                )
+
+                if origem == 'pet':
+                    return redirect(
+                        f"{reverse('pets:editar', args=[resgate.pet_id])}?aba=resgates"
+                    )
+
+                return redirect('resgates:lista')
 
             except Pet.DoesNotExist:
                 messages.error(
@@ -171,7 +188,7 @@ def adicionar(request):
             except ValueError:
                 messages.error(
                     request,
-                    'Informe uma data e hora válidas.'
+                    'Informe um Pet e uma data e hora válidos.'
                 )
 
     return render(
@@ -180,8 +197,10 @@ def adicionar(request):
         {
             'dados': dados,
             'pets': obter_pets_para_formulario(),
-        },
+            'origem': origem,
+        }
     )
+
 
 
 @login_required
@@ -191,7 +210,32 @@ def editar(request, resgate_id):
         pk=resgate_id,
     )
 
+    # Preserva o contexto de origem durante toda a edição.
+    origem = (
+        request.POST.get('origem', request.GET.get('origem', ''))
+        if request.method == 'POST'
+        else request.GET.get('origem', '')
+    )
+
+    contexto_pet_id = (
+        request.POST.get(
+            'contexto_pet_id',
+            request.GET.get('pet_id', ''),
+        ).strip()
+    )
+
     dados = dados_resgate(resgate)
+
+    # Na abertura pelo contexto do Pet, mantém o Pet selecionado.
+    if request.method == 'GET' and contexto_pet_id:
+        try:
+            pet = Pet.objects.get(
+                pk=contexto_pet_id,
+                is_active=True,
+            )
+            dados['pet_id'] = str(pet.id)
+        except (Pet.DoesNotExist, ValueError):
+            pass
 
     if request.method == 'POST':
         dados = {
@@ -204,14 +248,10 @@ def editar(request, resgate_id):
             'observacoes': request.POST.get(
                 'observacoes', ''
             ).strip(),
-            'is_active': True,
+            'is_active': resgate.is_active,
         }
 
-        obrigatorios = [
-            'pet_id',
-            'data_resgate',
-            'local',
-        ]
+        obrigatorios = ['pet_id', 'data_resgate', 'local']
 
         if any(not dados[campo] for campo in obrigatorios):
             messages.error(
@@ -222,7 +262,8 @@ def editar(request, resgate_id):
             try:
                 pet = Pet.objects.get(pk=dados['pet_id'])
 
-                # Não permite trocar para outro pet inativo.
+                # Permite manter o Pet atual, mesmo inativo,
+                # mas não trocar para outro Pet inativo.
                 if not pet.is_active and pet.pk != resgate.pet_id:
                     raise Pet.DoesNotExist
 
@@ -240,13 +281,19 @@ def editar(request, resgate_id):
                 resgate.local = dados['local']
                 resgate.descricao = dados['descricao'] or None
                 resgate.observacoes = dados['observacoes'] or None
-                resgate.is_active = dados['is_active']
                 resgate.save()
 
                 messages.success(
                     request,
                     'Resgate atualizado com sucesso.'
                 )
+
+                if origem == 'pet' and contexto_pet_id:
+                    return redirect(
+                        f"{reverse('pets:editar', args=[contexto_pet_id])}"
+                        "?aba=resgates"
+                    )
+
                 return redirect(
                     'resgates:editar',
                     resgate_id=resgate.id,
@@ -270,6 +317,8 @@ def editar(request, resgate_id):
             'resgate': resgate,
             'dados': dados,
             'pets': obter_pets_para_formulario(resgate),
+            'origem': origem,
+            'contexto_pet_id': contexto_pet_id,
         },
     )
 
@@ -279,12 +328,27 @@ def editar(request, resgate_id):
 def inativar(request, resgate_id):
     resgate = get_object_or_404(Resgate, pk=resgate_id)
 
+    origem = request.POST.get('origem', '')
+    contexto_pet_id = request.POST.get('contexto_pet_id', '').strip()
+
     if not resgate.is_active:
-        messages.warning(request, 'Este resgate já está inativo.')
+        messages.warning(
+            request,
+            'Este resgate já está inativo.'
+        )
     else:
         resgate.is_active = False
         resgate.save(update_fields=['is_active', 'updated_at'])
 
-        messages.success(request, 'Resgate excluído com sucesso.')
+        messages.success(
+            request,
+            'Resgate inativado com sucesso.'
+        )
+
+    if origem == 'pet' and contexto_pet_id:
+        return redirect(
+            f"{reverse('pets:editar', args=[contexto_pet_id])}"
+            "?aba=resgates"
+        )
 
     return redirect('resgates:lista')

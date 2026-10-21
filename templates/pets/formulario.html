@@ -588,15 +588,87 @@
                         aria-labelledby="tab-resgates"
                         tabindex="0"
                     >
-                        <div class="empty">
-                            <div class="empty-icon">
-                                <i class="ti ti-ambulance"></i>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Histórico de resgates</h3>
+
+                                <div class="card-actions">
+                                    <a
+                                        href="{% url 'resgates:adicionar' %}?pet_id={{ pet.id }}&origem=pet"
+                                        class="btn btn-primary"
+                                    >
+                                        <i class="ti ti-plus"></i>
+                                        Registrar resgate
+                                    </a>
+                                </div>
                             </div>
-                            <p class="empty-title">Resgates do pet</p>
-                            <p class="empty-subtitle text-secondary">
-                                O histórico de resgates será implementado
-                                nesta guia.
-                            </p>
+
+                            <div class="table-responsive">
+                                <table class="table table-vcenter">
+                                    <thead>
+                                        <tr>
+                                            <th>Data do resgate</th>
+                                            <th>Local</th>
+                                            <th>Descrição</th>
+                                            <th class="w-1">Ações</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% for resgate in resgates %}
+                                            <tr>
+                                                <td>
+                                                    {{ resgate.data_resgate|date:"d/m/Y H:i" }}
+                                                </td>
+
+                                                <td>{{ resgate.local }}</td>
+
+                                                <td>
+                                                    {{ resgate.descricao|default:"—"|truncatechars:80 }}
+                                                </td>
+
+                                                <td>
+                                                    <div class="resgatos-row-actions">
+                                                        <a href="{% url 'resgates:editar' resgate.id %}?origem=pet&pet_id={{ pet.id }}"
+                                                           class="btn btn-outline-secondary btn-icon"
+                                                           title="Ver/Editar resgate"
+                                                           aria-label="Editar resgate">
+                                                            <i class="ti ti-pencil"
+                                                               aria-hidden="true"></i>
+                                                        </a>
+                                                        <form
+                                                            method="post"
+                                                            action="{% url 'resgates:inativar' resgate.id %}"
+                                                            class="d-inline js-form-inativar"
+                                                            data-nome="resgate de {{ resgate.pet.nome }}"
+                                                        >
+                                                            {% csrf_token %}
+
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-icon btn-outline-secondary js-inativar"
+                                                                title="Inativar resgate"
+                                                                aria-label="Excluir resgate"
+                                                            >
+                                                                <i class="ti ti-trash"
+                                                                   aria-hidden="true"></i>
+                                                            </button>
+                                                            <input type="hidden" name="origem" value="pet">
+                                                            <input type="hidden" name="contexto_pet_id" value="{{ pet.id }}">
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center text-secondary py-4">
+                                                    Nenhum resgate registrado para este Pet.
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -627,5 +699,79 @@
     </div>
 
 </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const nomesAbas = {
+            'tab-cadastro': 'cadastro',
+            'tab-pessoas': 'pessoas',
+            'tab-situacoes': 'situacoes',
+            'tab-resgates': 'resgates',
+            'tab-atendimentos': 'atendimentos'
+        };
+
+        function abrirAba(idBotao) {
+            const botao = document.getElementById(idBotao);
+
+            if (!botao) return;
+
+            // Atualiza os botões.
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (item) {
+                const ativo = item === botao;
+
+                item.classList.toggle('active', ativo);
+                item.setAttribute('aria-selected', ativo ? 'true' : 'false');
+            });
+
+            // Atualiza os conteúdos.
+            Object.keys(nomesAbas).forEach(function (id) {
+                const item = document.getElementById(
+                    'conteudo-' + nomesAbas[id]
+                );
+
+                if (!item) return;
+
+                const ativo = id === idBotao;
+
+                item.classList.toggle('active', ativo);
+                item.classList.toggle('show', ativo);
+            });
+        }
+
+        // Restaura a guia indicada na URL.
+        const parametros = new URLSearchParams(window.location.search);
+        const aba = parametros.get('aba') || 'cadastro';
+        const idBotao = Object.keys(nomesAbas).find(function (id) {
+            return nomesAbas[id] === aba;
+        });
+
+        if (idBotao) {
+            abrirAba(idBotao);
+        }
+
+        // Atualiza a URL quando o usuário troca de guia.
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (botao) {
+            botao.addEventListener('click', function () {
+                const nomeAba = nomesAbas[this.id];
+
+                if (!nomeAba) return;
+
+                abrirAba(this.id);
+
+                const url = new URL(window.location.href);
+
+                if (nomeAba === 'cadastro') {
+                    url.searchParams.delete('aba');
+                } else {
+                    url.searchParams.set('aba', nomeAba);
+                }
+
+                window.history.replaceState({}, '', url);
+            });
+        });
+    });
+</script>
+
 
 {% endblock %}

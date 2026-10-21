@@ -85,12 +85,18 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         blank=True,
         db_column='last_access',
     )
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        null=True,
+        blank=True,
+    )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
     objects = UsuarioManager()
 
-    USERNAME_FIELD = 'pessoa'
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
     class Meta:

@@ -23,9 +23,16 @@ class PessoaBackend(ModelBackend):
             is_active=True,
         )
 
+        # Login administrativo por nome de usuário.
         usuario = usuarios.filter(
-            pessoa__cpf=identificador
+            username__iexact=identificador
         ).first()
+
+        # Mantém os meios de login existentes.
+        if usuario is None:
+            usuario = usuarios.filter(
+                pessoa__cpf=identificador
+            ).first()
 
         if usuario is None:
             usuario = usuarios.filter(

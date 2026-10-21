@@ -2,7 +2,7 @@
    Page - LIST
    ========================================= */
 
-.resgatos-people, .resgatos-pets {
+.resgatos-people, .resgatos-pets, .resgatos-resgates {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -184,11 +184,11 @@
 
 
 /* TABLE */
-.resgatos-people-table, .resgatos-pets-table {
+.resgatos-people-table, .resgatos-pets-table, .resgatos-resgates-table {
     margin-bottom: 0;
 }
 
-.resgatos-people-table thead th, .resgatos-pets-table thead th {
+.resgatos-people-table thead th, .resgatos-pets-table thead th, .resgatos-resgates-table thead th {
     padding: 0.75rem 0.875rem;
     background: var(--tblr-bg-surface-secondary, #f1f4f9);
     color: var(--resgatos-text, #182433);
@@ -198,7 +198,7 @@
     vertical-align: middle;
 }
 
-.resgatos-people-table tbody td, .resgatos-pets-table tbody td {
+.resgatos-people-table tbody td, .resgatos-pets-table tbody td, .resgatos-resgates-table tbody td  {
     padding: 0.75rem 0.875rem;
     border-bottom-color: var(--resgatos-border, #e5e9ef);
     color: var(--resgatos-text, #182433);
@@ -206,7 +206,7 @@
     vertical-align: middle;
 }
 
-.resgatos-people-table tbody tr:last-child td, .resgatos-pets-table tbody tr:last-child td {
+.resgatos-people-table tbody tr:last-child td, .resgatos-pets-table tbody tr:last-child td, .resgatos-resgates-table tbody tr:last-child td {
     border-bottom: 0;
 }
 

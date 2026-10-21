@@ -1,0 +1,217 @@
+
+{% extends 'base/app.html' %}
+{% load static %}
+
+{% block title %}
+    {% if resgate %}Editar resgate{% else %}Cadastrar resgate{% endif %} | Resgatos
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'vendor/tabler/css/tabler-icons.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/components/list.css' %}">
+
+<div class="resgatos-page resgatos-resgates">
+
+    <!-- Cabeçalho -->
+    <header class="resgatos-page-header">
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-ambulance"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">Resgates</h1>
+                <p class="resgatos-page-description">
+                    {% if resgate %}
+                        Editar resgate
+                    {% else %}
+                        Registrar resgate
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
+            <a href="{% url 'inicio' %}">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <a href="{% url 'resgates:lista' %}">
+                <i class="ti ti-ambulance" aria-hidden="true"></i>
+                Resgates
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <span>
+                {% if resgate %}Editar resgate{% else %}Novo resgate{% endif %}
+            </span>
+        </nav>
+    </header>
+
+    <!-- Formulário -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="ti ti-clipboard-heart me-2"></i>
+                Dados do resgate
+            </h2>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Identificação -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-id me-2"></i>
+                            Identificação
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label for="pet_id" class="form-label">
+                                    Pet
+                                </label>
+
+                                <select
+                                    class="form-select"
+                                    id="pet_id"
+                                    name="pet_id"
+                                    required
+                                >
+                                    <option value="">Selecione um Pet</option>
+
+                                    {% for pet in pets %}
+                                        <option
+                                            value="{{ pet.id }}"
+                                            {% if dados.pet_id|stringformat:"s" == pet.id|stringformat:"s" %}selected{% endif %}
+                                        >
+                                            {{ pet.nome }} — {{ pet.especie }}
+                                            {% if pet.microchip %}
+                                                ({{ pet.microchip }})
+                                            {% endif %}
+                                            {% if not pet.is_active %}
+                                                — Inativo
+                                            {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="form-hint">
+                                    Selecione o animal relacionado a este resgate.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="data_resgate" class="form-label">
+                                    Data e hora do resgate
+                                </label>
+
+                                <input
+                                    type="datetime-local"
+                                    class="form-control"
+                                    id="data_resgate"
+                                    name="data_resgate"
+                                    value="{{ dados.data_resgate|default:'' }}"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-12">
+                                <label for="local" class="form-label">
+                                    Local do resgate
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="local"
+                                    name="local"
+                                    maxlength="255"
+                                    value="{{ dados.local|default:'' }}"
+                                    placeholder="Endereço, bairro, cidade ou referência"
+                                    required
+                                >
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relato -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-notes me-2"></i>
+                            Relato do resgate
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label">
+                                Descrição
+                            </label>
+
+                            <textarea
+                                class="form-control"
+                                id="descricao"
+                                name="descricao"
+                                rows="5"
+                                placeholder="Descreva as circunstâncias do resgate, as condições do animal e como ele foi encontrado."
+                            >{{ dados.descricao|default:'' }}</textarea>
+                        </div>
+
+                        <div>
+                            <label for="observacoes" class="form-label">
+                                Observações complementares
+                            </label>
+
+                            <textarea
+                                class="form-control"
+                                id="observacoes"
+                                name="observacoes"
+                                rows="3"
+                                placeholder="Outras informações relevantes."
+                            >{{ dados.observacoes|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="d-flex justify-content-end gap-2 mb-4">
+                    <a
+                        href="{% url 'resgates:lista' %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy me-1"></i>
+
+                        {% if resgate %}
+                            Salvar alterações
+                        {% else %}
+                            Registrar resgate
+                        {% endif %}
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'apps.resgates',
     'apps.atendimentos',
     'apps.estoque',
+    'apps.medicamentos',
     'apps.fornecedores',
     'core',
 ]

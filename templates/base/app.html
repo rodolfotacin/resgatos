@@ -119,6 +119,22 @@
                 </span>
             </a>
 
+            <!-- MEDICAMENTOS -->
+            <a href="{% url 'medicamentos:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'medicamentos' %} is-active{% endif %}" aria-label="Medicamentos" title="Medicamentos">
+                <span class="resgatos-nav-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M17 3l4 4" />
+                        <path d="M19 5l-4.5 4.5" />
+                        <path d="M11.5 6.5l6 6" />
+                        <path d="M16.5 11.5l-6.5 6.5h-4v-4l6.5 -6.5" />
+                        <path d="M7.5 12.5l1.5 1.5" />
+                        <path d="M10.5 9.5l1.5 1.5" />
+                        <path d="M3 21l3 -3" />
+                    </svg>
+                </span>
+            </a>
+
             <!-- FORNECEDORES -->
             <a href="{% url 'fornecedores:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'fornecedores' %} is-active{% endif %}" aria-label="Fornecedores" title="Fornecedores">
                 <span class="resgatos-nav-icon">
@@ -165,9 +181,6 @@
                 <div class="resgatos-user">
                     <div class="resgatos-avatar resgatos-avatar-top">
 
-
-
-
                         {% if request.user.pessoa.foto %}
                             <a
                                 href="{{ request.user.pessoa.foto.url }}"
@@ -187,12 +200,6 @@
                                 <div class="alpha-init">{{ request.user.pessoa.nome|initials }}</div>
 
                         {% endif %}
-
-
-
-
-
-
 
                     </div>
                     <div class="resgatos-user-info">

@@ -173,9 +173,14 @@ def adicionar(request):
                 {'dados': dados}
             )
 
+    foto = request.FILES.get('foto')
+
     try:
         with transaction.atomic():
-            pessoa = Pessoa.objects.create(**dados)
+            pessoa = Pessoa.objects.create(
+                **dados,
+                foto=foto,
+            )
 
             if possui_acesso:
                 usuario = Usuario(
@@ -234,6 +239,9 @@ def editar(request, pessoa_id):
                 request.POST.get('is_attendance_responsible') == 'on'
             ),
         }
+
+        foto = request.FILES.get('foto')
+        remover_foto = request.POST.get('remover_foto') == '1'
 
         possui_acesso = request.POST.get('possui_acesso') == '1'
         senha = request.POST.get('senha', '')
@@ -358,6 +366,20 @@ def editar(request, pessoa_id):
                         continue
 
                     setattr(pessoa, campo, valor)
+
+                foto_anterior = None
+
+                if remover_foto and pessoa.foto:
+                    foto_anterior = pessoa.foto
+                    pessoa.foto = None
+
+                elif foto:
+                    pessoa.foto = foto
+
+                pessoa.save()
+
+                if foto_anterior:
+                    foto_anterior.delete(save=False)
 
                 pessoa.save()
 

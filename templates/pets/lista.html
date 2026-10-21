@@ -16,7 +16,7 @@
 
         <div class="resgatos-page-heading">
             <div class="resgatos-page-icon" aria-hidden="true">
-                <i class="ti ti-cat"></i>
+                <i class="ti ti-paw"></i>
             </div>
 
             <div>
@@ -112,7 +112,7 @@
             </div>
 
             <div class="resgatos-page-actions">
-                <a href="#"
+                <a href="{% url 'pets:adicionar' %}"
                    class="btn btn-primary"
                    aria-label="Adicionar pet">
                     <i class="ti ti-plus me-1" aria-hidden="true"></i>
@@ -145,7 +145,7 @@
                                 {% if pet.foto %}
                                     <a
                                         href="{{ pet.foto.url }}"
-                                        data-fancybox="pets"
+                                        data-fancybox="pet-photo"
                                         data-caption="{{ pet.nome }}"
                                         aria-label="Ampliar foto de {{ pet.nome }}"
                                     >
@@ -166,7 +166,7 @@
                             </td>
 
                             <td>
-                                <a href="#"
+                                <a href="{% url 'pets:editar' pet.id %}"
                                    class="resgatos-people-name">
                                     {{ pet.nome }}
                                 </a>
@@ -224,7 +224,7 @@
                             <td>
                                 <div class="resgatos-row-actions">
 
-                                    <a href="#"
+                                    <a href="{% url 'pets:editar' pet.id %}"
                                        class="btn btn-outline-secondary btn-icon"
                                        title="Ver/Editar cadastro"
                                        aria-label="Editar pet">

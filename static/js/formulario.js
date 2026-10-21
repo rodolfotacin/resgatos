@@ -240,4 +240,85 @@ $(document).ready(function () {
         });
     }
 
+
+    // Fancybox - Visualização ampliada de fotos
+    if (window.Fancybox) {
+        Fancybox.bind('[data-fancybox="pet-photo"]', {
+            Carousel: {
+                Thumbs: false,
+                Toolbar: {
+                    display: {
+                        left: [],
+                        middle: [],
+                        right: ['close'],
+                    },
+                },
+                Zoomable: {
+                    Panzoom: {
+                        maxScale: 'cover',
+                        panMode: 'mousemove',
+                        mouseMoveFactor: 1.1,
+                    },
+                },
+            },
+        });
+
+        Fancybox.bind('[data-fancybox="pessoa-photo"]', {
+            Carousel: {
+                Thumbs: false,
+                Toolbar: {
+                    display: {
+                        left: [],
+                        middle: [],
+                        right: ['close'],
+                    },
+                },
+                Zoomable: {
+                    Panzoom: {
+                        maxScale: 'cover',
+                        panMode: 'mousemove',
+                        mouseMoveFactor: 1.1,
+                    },
+                },
+            },
+        });
+    }
+
+
+    // Confirmação da remoção da foto do cadastro
+    $('#btn-remover-foto').on('click', function (event) {
+    event.preventDefault();
+
+    const botao = this;
+    const formulario = botao.form;
+
+    Swal.fire({
+        title: 'Remover foto?',
+        text: 'A foto será removida permanentemente.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, remover',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#d63939',
+        reverseButtons: true,
+    }).then((resultado) => {
+        if (resultado.isConfirmed) {
+            // Cria um campo oculto para identificar a operação.
+            let campo = formulario.querySelector(
+                'input[name="remover_foto"]'
+            );
+
+            if (!campo) {
+                campo = document.createElement('input');
+                campo.type = 'hidden';
+                campo.name = 'remover_foto';
+                campo.value = '1';
+                formulario.appendChild(campo);
+            }
+
+            formulario.requestSubmit();
+        }
+    });
+});
+
 });

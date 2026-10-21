@@ -1,7 +1,11 @@
+from datetime import date
+
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Prefetch, Q
-from django.shortcuts import render
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .models import Pet, PessoaPet
 
@@ -52,4 +56,210 @@ def lista(request):
             'page_obj': page_obj,
             'paginator': paginator,
         }
+    )
+
+
+@login_required
+def adicionar(request):
+    dados = {
+        'nome': '',
+        'microchip': '',
+        'especie': '',
+        'raca': '',
+        'sexo': '',
+        'cor': '',
+        'data_nascimento': '',
+        'porte': '',
+        'pelagem': '',
+        'observacoes': '',
+        'is_active': True,
+    }
+
+    if request.method == 'POST':
+        dados = {
+            'nome': request.POST.get('nome', '').strip(),
+            'microchip': request.POST.get('microchip', '').strip() or None,
+            'especie': request.POST.get('especie', '').strip(),
+            'raca': request.POST.get('raca', '').strip() or None,
+            'sexo': request.POST.get('sexo', '').strip() or None,
+            'cor': request.POST.get('cor', '').strip() or None,
+            'data_nascimento': request.POST.get('data_nascimento', '').strip() or None,
+            'porte': request.POST.get('porte', '').strip() or None,
+            'pelagem': request.POST.get('pelagem', '').strip() or None,
+            'observacoes': request.POST.get('observacoes', '').strip() or None,
+            'is_active': request.POST.get('is_active', 'true') == 'true',
+        }
+
+        obrigatorios = ['nome', 'especie']
+
+        if any(not dados[campo] for campo in obrigatorios):
+            messages.error(
+                request,
+                'Preencha os campos obrigatórios.'
+            )
+            return render(
+                request,
+                'pets/formulario.html',
+                {'dados': dados},
+            )
+
+        try:
+            data_nascimento = (
+                date.fromisoformat(dados['data_nascimento'])
+                if dados['data_nascimento']
+                else None
+            )
+        except ValueError:
+            messages.error(
+                request,
+                'Informe uma data de nascimento válida.'
+            )
+            return render(
+                request,
+                'pets/formulario.html',
+                {'dados': dados},
+            )
+
+        foto = request.FILES.get('foto')
+
+        Pet.objects.create(
+            nome=dados['nome'],
+            microchip=dados['microchip'],
+            especie=dados['especie'],
+            raca=dados['raca'],
+            sexo=dados['sexo'],
+            cor=dados['cor'],
+            data_nascimento=data_nascimento,
+            porte=dados['porte'],
+            pelagem=dados['pelagem'],
+            foto=foto,
+            observacoes=dados['observacoes'],
+            is_active=dados['is_active'],
+        )
+
+        messages.success(
+            request,
+            'Pet cadastrado com sucesso.'
+        )
+        return redirect('pets:lista')
+
+    return render(
+        request,
+        'pets/formulario.html',
+        {'dados': dados},
+    )
+
+
+
+@login_required
+def editar(request, pet_id):
+    pet = get_object_or_404(Pet, pk=pet_id)
+
+    dados = {
+        'nome': pet.nome,
+        'microchip': pet.microchip or '',
+        'especie': pet.especie,
+        'raca': pet.raca or '',
+        'sexo': pet.sexo or '',
+        'cor': pet.cor or '',
+        'data_nascimento': pet.data_nascimento or '',
+        'porte': pet.porte or '',
+        'pelagem': pet.pelagem or '',
+        'observacoes': pet.observacoes or '',
+        'is_active': pet.is_active,
+    }
+
+    if request.method == 'POST':
+        dados = {
+            'nome': request.POST.get('nome', '').strip(),
+            'microchip': request.POST.get('microchip', '').strip() or None,
+            'especie': request.POST.get('especie', '').strip(),
+            'raca': request.POST.get('raca', '').strip() or None,
+            'sexo': request.POST.get('sexo', '').strip() or None,
+            'cor': request.POST.get('cor', '').strip() or None,
+            'data_nascimento': request.POST.get(
+                'data_nascimento', ''
+            ).strip() or None,
+            'porte': request.POST.get('porte', '').strip() or None,
+            'pelagem': request.POST.get('pelagem', '').strip() or None,
+            'observacoes': request.POST.get(
+                'observacoes', ''
+            ).strip() or None,
+            'is_active': request.POST.get('is_active') == 'true',
+        }
+
+        if not dados['nome'] or not dados['especie']:
+            messages.error(
+                request,
+                'Preencha os campos obrigatórios.'
+            )
+            return render(
+                request,
+                'pets/formulario.html',
+                {'pet': pet, 'dados': dados},
+            )
+
+        try:
+            data_nascimento = (
+                date.fromisoformat(dados['data_nascimento'])
+                if dados['data_nascimento']
+                else None
+            )
+        except ValueError:
+            messages.error(
+                request,
+                'Informe uma data de nascimento válida.'
+            )
+            return render(
+                request,
+                'pets/formulario.html',
+                {'pet': pet, 'dados': dados},
+            )
+
+        with transaction.atomic():
+            pet.nome = dados['nome']
+            pet.microchip = dados['microchip']
+            pet.especie = dados['especie']
+            pet.raca = dados['raca']
+            pet.sexo = dados['sexo']
+            pet.cor = dados['cor']
+            pet.data_nascimento = data_nascimento
+            pet.porte = dados['porte']
+            pet.pelagem = dados['pelagem']
+            pet.observacoes = dados['observacoes']
+            pet.is_active = dados['is_active']
+
+            foto = request.FILES.get('foto')
+            remover_foto = request.POST.get('remover_foto') == '1'
+
+            foto_anterior = None
+
+            if remover_foto and pet.foto:
+                foto_anterior = pet.foto
+                pet.foto = None
+
+            elif foto:
+                pet.foto = foto
+
+            pet.save()
+
+            if foto_anterior:
+                foto_anterior.delete(save=False)
+
+            pet.save()
+
+        messages.success(
+            request,
+            'Pet atualizado com sucesso.'
+        )
+
+        return redirect('pets:editar', pet_id=pet.id)
+
+    return render(
+        request,
+        'pets/formulario.html',
+        {
+            'pet': pet,
+            'dados': dados,
+        },
     )

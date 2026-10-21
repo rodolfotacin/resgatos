@@ -1,20 +1,77 @@
 
 from django.db import models
+from core.utils.upload import foto_pet
 
 from apps.pessoas.models import Pessoa
 
+
 class Pet(models.Model):
-    microchip = models.CharField(max_length=100, blank=True, null=True)
+    id = models.AutoField(primary_key=True)
+
+    microchip = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+
     nome = models.CharField(max_length=45)
     especie = models.CharField(max_length=100)
-    raca = models.CharField(max_length=100, blank=True, null=True)
-    sexo = models.CharField(max_length=1, blank=True, null=True)
-    cor = models.CharField(max_length=45, blank=True, null=True)
-    data_nascimento = models.DateField(blank=True, null=True)
-    porte = models.CharField(max_length=45, blank=True, null=True)
-    pelagem = models.CharField(max_length=45, blank=True, null=True)
-    foto = models.ImageField(upload_to='pets/', blank=True, null=True)
-    observacoes = models.TextField(blank=True, null=True)
+
+    raca = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+
+    sexo = models.CharField(
+        max_length=1,
+        blank=True,
+        null=True,
+    )
+
+    cor = models.CharField(
+        max_length=45,
+        blank=True,
+        null=True,
+    )
+
+    data_nascimento = models.DateField(
+        blank=True,
+        null=True,
+    )
+
+    porte = models.CharField(
+        max_length=45,
+        blank=True,
+        null=True,
+    )
+
+    pelagem = models.CharField(
+        max_length=45,
+        blank=True,
+        null=True,
+    )
+
+    foto = models.ImageField(
+        upload_to=foto_pet,
+        blank=True,
+        null=True,
+    )
+
+    observacoes = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        null=True,
+        blank=True,
+    )
+
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'pet'
@@ -24,7 +81,6 @@ class Pet(models.Model):
 
     def __str__(self):
         return self.nome
-
 
 
 class PessoaPet(models.Model):

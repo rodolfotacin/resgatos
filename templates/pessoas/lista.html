@@ -6,9 +6,6 @@
 
 {% block content %}
 
-<link rel="stylesheet" href="{% static 'vendor/tabler/css/tabler-icons.min.css' %}">
-<link rel="stylesheet" href="{% static 'css/components/list.css' %}">
-
 <div class="resgatos-page resgatos-people">
 
 
@@ -146,16 +143,16 @@
                         <tr>
 
                              <td>
-                                {% if people.foto %}
+                                {% if pessoa.foto %}
                                     <a
-                                        href="{{ people.foto.url }}"
-                                        data-fancybox="people"
-                                        data-caption="{{ people.nome }}"
-                                        aria-label="Ampliar foto de {{ people.nome }}"
+                                        href="{{ pessoa.foto.url }}"
+                                        data-fancybox="pessoa-photo"
+                                        data-caption="{{ pessoa.nome }}"
+                                        aria-label="Ampliar foto de {{ pessoa.nome }}"
                                     >
                                         <img
-                                            src="{{ people.foto.url }}"
-                                            alt="Foto de {{ people.nome }}"
+                                            src="{{ pessoa.foto.url }}"
+                                            alt="Foto de {{ pessoa.nome }}"
                                             class="resgatos-people-photo"
                                             loading="lazy"
                                         >
@@ -168,7 +165,7 @@
                             </td>
 
                             <td>
-                                <a href="#" class="resgatos-people-name">
+                                <a href="{% url 'pessoas:editar' pessoa.id %}" class="resgatos-people-name">
                                     {{ pessoa.nome }}
                                 </a>
                                 <div class="resgatos-people-meta">

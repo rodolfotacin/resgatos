@@ -529,6 +529,50 @@
 }
 
 
+/* Identificação da pessoa nas telas com guias */
+.resgatos-pessoa-identificacao-foto,
+.resgatos-pessoa-identificacao-sem-foto {
+    width: 76px;
+    height: 76px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.resgatos-pessoa-identificacao-foto {
+    display: block;
+}
+
+.resgatos-pessoa-identificacao-sem-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--tblr-bg-surface-secondary);
+    color: var(--tblr-secondary);
+    font-size: 2rem;
+}
+
+/* Identificação do pet nas telas com guias */
+.resgatos-pet-identificacao-foto,
+.resgatos-pet-identificacao-sem-foto {
+    width: 76px;
+    height: 76px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.resgatos-pet-identificacao-foto {
+    display: block;
+}
+
+.resgatos-pet-identificacao-sem-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--tblr-bg-surface-secondary);
+    color: var(--tblr-secondary);
+    font-size: 2rem;
+}
+
 
 /* RESPONSIVE */
 

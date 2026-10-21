@@ -153,3 +153,7 @@ AUTH_USER_MODEL = 'pessoas.Usuario'
 AUTHENTICATION_BACKENDS = [
     'apps.pessoas.backends.PessoaBackend',
 ]
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = BASE_DIR / 'data'

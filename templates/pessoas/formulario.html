@@ -52,6 +52,55 @@
         </nav>
     </header>
 
+    {% if pessoa %}
+        <!-- Identificação da pessoa -->
+        <div class="card mb-3">
+            <div class="card-body py-3">
+                <div class="d-flex align-items-center gap-3">
+
+                    <!-- Foto -->
+                    <div class="flex-shrink-0">
+                        {% if pessoa.foto %}
+                            <a
+                                href="{{ pessoa.foto.url }}"
+                                data-fancybox="pessoa-photo"
+                                data-caption="{{ pessoa.nome }}"
+                                aria-label="Ampliar foto de {{ pessoa.nome }}"
+                            >
+                                <img
+                                    src="{{ pessoa.foto.url }}"
+                                    alt="Foto de {{ pessoa.nome }}"
+                                    class="resgatos-pessoa-identificacao-foto"
+                                    loading="lazy"
+                                >
+                            </a>
+                        {% else %}
+                            <div
+                                class="resgatos-pessoa-identificacao-sem-foto"
+                                aria-label="Pessoa sem foto"
+                            >
+                                <i class="ti ti-user" aria-hidden="true"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Dados da pessoa -->
+                    <div class="flex-fill min-w-0">
+                        <h2 class="h2 mb-1">
+                            {{ pessoa.nome }}
+                        </h2>
+
+                        <div class="text-secondary small">
+                            <span class="fw-semibold">CPF:</span>
+                            {{ pessoa.cpf }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <div class="card">
         <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs" role="tablist">
@@ -102,6 +151,7 @@
                 >
                     <form
                             method="post"
+                            enctype="multipart/form-data"
                             data-modo="{% if pessoa %}editar{% else %}adicionar{% endif %}"
                     >
                         {% csrf_token %}
@@ -188,6 +238,48 @@
 
                                 </div>
 
+                            </div>
+                        </div>
+
+                        <!-- Foto -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="ti ti-photo me-2"></i>
+                                    Foto
+                                </h3>
+                            </div>
+
+                            <div class="card-body">
+                                <label for="foto" class="form-label">
+                                    Foto
+                                </label>
+                                <input
+                                    type="file"
+                                    class="form-control"
+                                    id="foto"
+                                    name="foto"
+                                    accept="image/*"
+                                >
+                                <div class="form-hint">
+                                    Selecione uma foto.
+                                    A foto é opcional.
+                                </div>
+
+                                {% if pessoa and pessoa.foto %}
+                                    <div class="mt-3">
+                                        <button
+                                            type="submit"
+                                            name="remover_foto"
+                                            value="1"
+                                            class="btn btn-outline-danger"
+                                            id="btn-remover-foto"
+                                        >
+                                            <i class="ti ti-trash me-2"></i>
+                                            Remover foto
+                                        </button>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
 
@@ -579,7 +671,6 @@
 
 
 {% block scripts %}
-<script src="{% static 'js/formulario.js' %}"></script>
 <script src="{% static 'vendor/intl-tel-input/js/intlTelInput.min.js' %}"></script>
 {% endblock %}
 

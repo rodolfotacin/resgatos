@@ -271,4 +271,8 @@ Emerson Carvalho,
 Erica Priscila de Carvalho Santos, 
 Maillon Rangel Jacob Moreira, 
 Rodolfo Vendrasco Tacin, 
-Simone Aparecida Brasil Miller
+Simone Aparecida Brasil Miller.
+
+## Orientador
+
+Andres Ivan Rodriguez Morales

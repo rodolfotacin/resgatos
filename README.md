@@ -1,12 +1,11 @@
-[README.md](https://github.com/user-attachments/files/33781587/README.md)
 # Resgatos --- Sistema de Gestão de Resgates de Animais
 
 Aplicação web desenvolvida em **Python e Django** para apoiar a
 organização das atividades da ONG Resgatos, centralizando informações
 sobre pessoas, animais e resgates.
 
-O projeto foi desenvolvido como parte da disciplina **Projeto Integrador
-da Universidade Virtual do Estado de São Paulo (Univesp)**.
+O projeto foi desenvolvido como parte da disciplina **Projeto Integrador II 
+do Eixo de Computação da Universidade Virtual do Estado de São Paulo (Univesp)**.
 
 **Repositório:** https://github.com/rodolfotacin/resgatos
 
@@ -266,5 +265,10 @@ construção de uma solução de apoio às atividades de resgate animal.
 
 ## Equipe
 
-Adicione aqui os nomes dos integrantes, a orientação acadêmica e os
-contatos oficiais da equipe.
+Alan dos Santos de Oliveira,
+Antonio Fernandes Braga Neto, 
+Emerson Carvalho, 
+Erica Priscila de Carvalho Santos, 
+Maillon Rangel Jacob Moreira, 
+Rodolfo Vendrasco Tacin, 
+Simone Aparecida Brasil Miller

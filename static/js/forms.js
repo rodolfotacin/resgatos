@@ -8,6 +8,9 @@ $(document).ready(function () {
     // CEP
     $('.js-cep').mask('00000-000');
 
+    // CNPJ
+    $('.js-cnpj').mask('00.000.000/0000-00');
+
     // Consulta de CEP - ViaCEP
     const campoCep = document.querySelector('.js-cep');
 
@@ -289,38 +292,155 @@ $(document).ready(function () {
 
     // Confirmação da remoção da foto do cadastro
     $('#btn-remover-foto').on('click', function (event) {
-    event.preventDefault();
+        event.preventDefault();
 
-    const botao = this;
-    const formulario = botao.form;
+        const botao = this;
+        const formulario = botao.form;
 
-    Swal.fire({
-        title: 'Remover foto?',
-        text: 'A foto será removida permanentemente.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sim, remover',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#d63939',
-        reverseButtons: true,
-    }).then((resultado) => {
-        if (resultado.isConfirmed) {
-            // Cria um campo oculto para identificar a operação.
-            let campo = formulario.querySelector(
-                'input[name="remover_foto"]'
-            );
+        Swal.fire({
+            title: 'Remover foto?',
+            text: 'A foto será removida permanentemente.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, remover',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d63939',
+            reverseButtons: true,
+        }).then((resultado) => {
+            if (resultado.isConfirmed) {
+                // Cria um campo oculto para identificar a operação.
+                let campo = formulario.querySelector(
+                    'input[name="remover_foto"]'
+                );
 
-            if (!campo) {
-                campo = document.createElement('input');
-                campo.type = 'hidden';
-                campo.name = 'remover_foto';
-                campo.value = '1';
-                formulario.appendChild(campo);
+                if (!campo) {
+                    campo = document.createElement('input');
+                    campo.type = 'hidden';
+                    campo.name = 'remover_foto';
+                    campo.value = '1';
+                    formulario.appendChild(campo);
+                }
+
+                formulario.requestSubmit();
+            }
+        });
+    });
+
+
+    // Consulta de CNPJ ao sair do campo
+    const campoCnpj = document.querySelector('#cnpj');
+    const statusCnpj = document.querySelector('#cnpj-status');
+
+    if (campoCnpj) {
+        let ultimaConsulta = '';
+        let consultando = false;
+
+        function somenteNumeros(valor) {
+            return valor.replace(/\D/g, '');
+        }
+
+        async function consultarFornecedor() {
+            const cnpj = somenteNumeros(campoCnpj.value);
+
+            if (
+                cnpj.length !== 14 ||
+                cnpj === cnpj[0].repeat(14) ||
+                cnpj === ultimaConsulta ||
+                consultando
+            ) {
+                return;
             }
 
-            formulario.requestSubmit();
+            consultando = true;
+
+            if (statusCnpj) {
+                statusCnpj.textContent = 'Consultando CNPJ...';
+            }
+
+            try {
+                const url = new URL(
+                    campoCnpj.dataset.url,
+                    window.location.origin
+                );
+
+                url.searchParams.set('cnpj', cnpj);
+
+                const resposta = await fetch(url);
+
+                if (!resposta.ok) {
+                    throw new Error('Falha na consulta do CNPJ.');
+                }
+
+                const resultado = await resposta.json();
+
+                if (somenteNumeros(campoCnpj.value) !== cnpj) {
+                    return;
+                }
+
+                ultimaConsulta = cnpj;
+
+                if (statusCnpj) {
+                    statusCnpj.textContent = '';
+                }
+
+                if (!resultado.encontrado) {
+                    return;
+                }
+
+                const confirmacao = await Swal.fire({
+                    title: resultado.is_active
+                        ? 'Fornecedor encontrado'
+                        : 'Fornecedor inativo',
+                    text: resultado.is_active
+                        ? `O cadastro de ${resultado.nome} já existe. Deseja editá-lo?`
+                        : `O cadastro de ${resultado.nome} está inativo. Deseja reativá-lo e editá-lo?`,
+                    icon: resultado.is_active ? 'info' : 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: resultado.is_active
+                        ? 'Abrir cadastro'
+                        : 'Reativar e editar',
+                    cancelButtonText: 'Continuar',
+                    confirmButtonColor: '#263563'
+                });
+
+                if (confirmacao.isConfirmed) {
+                    const destino = new URL(
+                        resultado.url_editar,
+                        window.location.origin
+                    );
+
+                    if (!resultado.is_active) {
+                        destino.searchParams.set('reativar', '1');
+                    }
+
+                    window.location.href = destino.href;
+                }
+
+            } catch (erro) {
+                console.error('Erro ao consultar CNPJ:', erro);
+
+                if (statusCnpj) {
+                    statusCnpj.textContent =
+                        'Não foi possível consultar o CNPJ. Tente novamente.';
+                }
+
+                ultimaConsulta = '';
+
+            } finally {
+                consultando = false;
+            }
         }
-    });
-});
+
+        campoCnpj.addEventListener('blur', consultarFornecedor);
+
+        campoCnpj.addEventListener('input', function () {
+            const cnpj = somenteNumeros(this.value);
+
+            if (cnpj !== ultimaConsulta) {
+                ultimaConsulta = '';
+            }
+        });
+    }
+
 
 });

@@ -1,0 +1,268 @@
+
+{% extends 'base/app.html' %}
+{% load static %}
+
+{% block title %}
+    {% if fornecedor %}
+        Editar fornecedor | Resgatos
+    {% else %}
+        Cadastrar fornecedor | Resgatos
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'vendor/intl-tel-input/css/intlTelInput.css' %}">
+
+<div class="resgatos-page resgatos-suppliers">
+
+    <!-- Cabeçalho -->
+    <header class="resgatos-page-header">
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-building-store"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">Fornecedores</h1>
+                <p class="resgatos-page-description">
+                    {% if fornecedor %}
+                        {% if reativar %}
+                            Reativar e editar fornecedor
+                        {% else %}
+                            Editar fornecedor
+                        {% endif %}
+                    {% else %}
+                        Cadastrar fornecedor
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
+            <a href="{% url 'inicio' %}">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <a href="{% url 'fornecedores:lista' %}">
+                <i class="ti ti-building-store" aria-hidden="true"></i>
+                Fornecedores
+            </a>
+
+            <span aria-hidden="true">/</span>
+            <span>Novo fornecedor</span>
+        </nav>
+    </header>
+
+    <!-- Formulário -->
+    <div class="card mb-4">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="ti ti-clipboard-list me-2"></i>
+                Dados do fornecedor
+            </h2>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post" data-modo="{% if fornecedor %}editar{% else %}adicionar{% endif %}" novalidate>
+                {% csrf_token %}
+
+                {% if reativar %}
+                    <input type="hidden" name="reativar" value="1">
+                {% endif %}
+
+                <!-- Identificação -->
+                <div class="card mb-4">
+
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-id me-2"></i>
+                            Identificação
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="cnpj" class="form-label">
+                                    CNPJ <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control js-cnpj"
+                                    id="cnpj"
+                                    name="cnpj"
+                                    maxlength="18"
+                                    value="{{ dados.cnpj|default:'' }}"
+                                    placeholder="00.000.000/0000-00"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    data-url="{% url 'fornecedores:consultar_cnpj' %}"
+                                    required
+                                >
+
+                                <div class="form-hint">
+                                    Informe os 14 dígitos do CNPJ.
+                                </div>
+
+                                <div id="cnpj-status" class="form-hint" aria-live="polite"></div>
+                            </div>
+
+                            <div class="col-md-8">
+                                <label for="razao_social" class="form-label">
+                                    Razão social <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="razao_social"
+                                    name="razao_social"
+                                    maxlength="150"
+                                    value="{{ dados.razao_social|default:'' }}"
+                                    placeholder="Razão social da empresa"
+                                    autocomplete="organization"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="nome_fantasia" class="form-label">
+                                    Nome fantasia <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="nome_fantasia"
+                                    name="nome_fantasia"
+                                    maxlength="100"
+                                    value="{{ dados.nome_fantasia|default:'' }}"
+                                    placeholder="Nome comercial da empresa"
+                                    required
+                                >
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contato -->
+                <div class="card mb-4">
+
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-address-book me-2"></i>
+                            Contato
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <!-- Telefone -->
+                            <div class="col-md-6">
+                                <label for="telefone" class="form-label">
+                                    Telefone
+                                </label>
+                                <input
+                                        type="tel"
+                                        class="form-control js-telefone"
+                                        id="telefone"
+                                        name="telefone"
+                                        maxlength="25"
+                                        placeholder="(00) 00000-0000"
+                                        value="{{ dados.telefone|default:'' }}"
+                                        required
+                                >
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">
+                                    E-mail
+                                </label>
+
+                                <input
+                                    type="email"
+                                    class="form-control"
+                                    id="email"
+                                    name="email"
+                                    maxlength="100"
+                                    value="{{ dados.email|default:'' }}"
+                                    placeholder="contato@empresa.com.br"
+                                    autocomplete="email"
+                                >
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="card mb-4">
+
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-notes me-2"></i>
+                            Informações complementares
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div>
+                            <label for="observacoes" class="form-label">
+                                Observações
+                            </label>
+
+                            <textarea
+                                class="form-control"
+                                id="observacoes"
+                                name="observacoes"
+                                rows="4"
+                                placeholder="Informações adicionais sobre o fornecedor."
+                            >{{ dados.observacoes|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="d-flex justify-content-end gap-2 mb-4">
+
+                    <a
+                        href="{% url 'fornecedores:lista' %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        <i class="ti ti-x me-1"></i>
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy me-1"></i>
+
+                        {% if fornecedor %}
+                            {% if reativar %}
+                                Reativar e salvar
+                            {% else %}
+                                Salvar alterações
+                            {% endif %}
+                        {% else %}
+                            Cadastrar fornecedor
+                        {% endif %}
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'vendor/intl-tel-input/js/intlTelInput.min.js' %}"></script>
+
+{% endblock %}

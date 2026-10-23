@@ -2,7 +2,10 @@
    Page - LIST
    ========================================= */
 
-.resgatos-people, .resgatos-pets, .resgatos-resgates {
+.resgatos-people,
+.resgatos-pets,
+.resgatos-resgates,
+.resgatos-suppliers {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -184,11 +187,17 @@
 
 
 /* TABLE */
-.resgatos-people-table, .resgatos-pets-table, .resgatos-resgates-table {
+.resgatos-people-table,
+.resgatos-pets-table,
+.resgatos-resgates-table.
+.resgatos-suppliers-table {
     margin-bottom: 0;
 }
 
-.resgatos-people-table thead th, .resgatos-pets-table thead th, .resgatos-resgates-table thead th {
+.resgatos-people-table thead th,
+.resgatos-pets-table thead th,
+.resgatos-resgates-table thead th,
+.resgatos-suppliers-table thead th {
     padding: 0.75rem 0.875rem;
     background: var(--tblr-bg-surface-secondary, #f1f4f9);
     color: var(--resgatos-text, #182433);
@@ -198,7 +207,10 @@
     vertical-align: middle;
 }
 
-.resgatos-people-table tbody td, .resgatos-pets-table tbody td, .resgatos-resgates-table tbody td  {
+.resgatos-people-table tbody td,
+.resgatos-pets-table tbody td,
+.resgatos-resgates-table tbody td,
+.resgatos-suppliers-table tbody td {
     padding: 0.75rem 0.875rem;
     border-bottom-color: var(--resgatos-border, #e5e9ef);
     color: var(--resgatos-text, #182433);
@@ -206,7 +218,10 @@
     vertical-align: middle;
 }
 
-.resgatos-people-table tbody tr:last-child td, .resgatos-pets-table tbody tr:last-child td, .resgatos-resgates-table tbody tr:last-child td {
+.resgatos-people-table tbody tr:last-child td,
+.resgatos-pets-table tbody tr:last-child td,
+.resgatos-resgates-table tbody tr:last-child td,
+.resgatos-suppliers-table tbody tr:last-child td {
     border-bottom: 0;
 }
 
@@ -214,7 +229,8 @@
     width: 4.5rem;
 }
 
-.resgatos-people-avatar, .resgatos-pets-avatar {
+.resgatos-people-avatar,
+.resgatos-pets-avatar {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,7 +244,8 @@
     font-weight: 600;
 }
 
-.resgatos-people-avatar img, .resgatos-pets-avatar img {
+.resgatos-people-avatar img,
+.resgatos-pets-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -248,38 +265,45 @@
     justify-content: center;
 }
 
-.resgatos-people-photo, .resgatos-pets-photo {
+.resgatos-people-photo,
+.resgatos-pets-photo {
     border: 1px solid var(--tblr-border-color, #e6e7e9);
     transition: transform 0.2s ease;
 }
 
-.resgatos-people-photo:hover, .resgatos-pets-photo:hover {
+.resgatos-people-photo:hover,
+.resgatos-pets-photo:hover {
     transform: scale(1.05);
 }
 
-.resgatos-people-avatar, .resgatos-pets-avatar {
+.resgatos-people-avatar,
+.resgatos-pets-avatar {
     background: var(--tblr-blue-lt, #e6f0ff);
     color: var(--tblr-blue, #066fd1);
     font-size: 1.5rem;
     flex-shrink: 0;
 }
 
-.resgatos-people-table th, .resgatos-pets-table th {
+.resgatos-people-table th,
+.resgatos-pets-table th {
     white-space: nowrap;
 }
 
 
-.resgatos-people-name, .resgatos-pets-name {
+.resgatos-people-name,
+.resgatos-pets-name {
     color: var(--resgatos-text, #182433);
     font-weight: 600;
     text-decoration: none;
 }
 
-.resgatos-people-name:hover, .resgatos-pets-name:hover {
+.resgatos-people-name:hover,
+.resgatos-pets-name:hover {
     color: var(--tblr-primary, #206bc4);
 }
 
-.resgatos-people-meta, .resgatos-pets-meta {
+.resgatos-people-meta,
+.resgatos-pets-meta {
     margin-top: 0.25rem;
     color: var(--resgatos-text-muted, #667085);
     font-size: 0.75rem;

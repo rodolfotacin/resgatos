@@ -233,15 +233,14 @@ publicação em produção.
 
   `python manage.py makemigrations`            Gera migrações a partir de
                                                alterações nos modelos
-
   `python manage.py showmigrations`            Lista o estado das migrações
 
   `python manage.py check`                     Verifica problemas comuns na
                                                configuração do Django
-
-  `python manage.py recuperar_administrador`   Cria ou recupera a conta
-                                               administrativa, quando o comando
-                                               estiver implementado
+                                               
+  `python manage.py recuperar_administrador`   Cria ou recupera a conta administrativa, 
+                                               quando o comando estiver implementado
+                                               
   --------------------------------------------------------------------------------
 
 ## Segurança

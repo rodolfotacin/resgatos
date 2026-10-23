@@ -1,0 +1,586 @@
+
+{% extends 'base/app.html' %}
+{% load static %}
+{% load text_tags %}
+
+{% block title %}Associar pessoa ao pet | Resgatos{% endblock %}
+
+{% block content %}
+
+<div class="resgatos-page resgatos-pets">
+
+    <!-- Cabeçalho -->
+    <header class="resgatos-page-header">
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-link"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">Pessoas e pets</h1>
+                <p class="resgatos-page-description">
+                    Associar pessoa ao pet
+                </p>
+            </div>
+        </div>
+
+        <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
+            <a href="{% url 'inicio' %}">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <a href="{% url 'pets:lista' %}">
+                <i class="ti ti-cat" aria-hidden="true"></i>
+                Pets
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <a href="{% url 'pets:editar' pet.id %}?aba=pessoas">
+                <i class="ti ti-users" aria-hidden="true"></i>
+                Pessoas relacionadas a {{ pet.nome }}
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <span>Associar pessoa</span>
+        </nav>
+    </header>
+
+    <!-- Formulário principal -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="ti ti-link me-2"></i>
+                Dados do vínculo
+            </h2>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post" id="form-associar-pessoa">
+                {% csrf_token %}
+
+                {% if erros %}
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-title">
+                            Não foi possível salvar a associação
+                        </h4>
+
+                        <ul class="mb-0">
+                            {% for erro in erros %}
+                                <li>{{ erro }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Identificação -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-id me-2"></i>
+                            Identificação
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label class="form-label">Pet</label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="{{ pet.nome }}"
+                                    readonly
+                                >
+
+                                <div class="form-hint">
+                                    Pet para o qual o vínculo será registrado.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label
+                                    for="pessoa_selecionada"
+                                    class="form-label"
+                                >
+                                    Pessoa selecionada
+                                </label>
+
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="pessoa_selecionada"
+                                        value="{% if pessoa_selecionada %}{{ pessoa_selecionada.nome }}{% else %}Nenhuma pessoa selecionada{% endif %}"
+                                        placeholder="Selecione uma pessoa"
+                                        readonly
+                                    >
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-primary"
+                                        id="btn-selecionar-pessoa"
+                                    >
+                                        <i
+                                            class="ti ti-search me-1"
+                                            aria-hidden="true"
+                                        ></i>
+                                        Selecionar
+                                    </button>
+                                </div>
+
+                                <input
+                                    type="hidden"
+                                    name="pessoa_id"
+                                    id="pessoa_id"
+                                    value="{% if pessoa_selecionada %}{{ pessoa_selecionada.id }}{% endif %}"
+                                >
+
+                                <div class="form-hint">
+                                    Clique em Selecionar para localizar a pessoa.
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados do vínculo -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-calendar me-2"></i>
+                            Dados do vínculo
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label
+                                    for="tipo_relacao"
+                                    class="form-label"
+                                >
+                                    Tipo de relação
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="tipo_relacao"
+                                    name="tipo_relacao"
+                                    maxlength="45"
+                                    value="{{ dados.tipo_relacao|default:'' }}"
+                                    placeholder="Ex.: tutor, lar temporário"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-md-4">
+                                <label
+                                    for="data_inicio"
+                                    class="form-label"
+                                >
+                                    Data de início
+                                </label>
+
+                                <input
+                                    type="date"
+                                    class="form-control"
+                                    id="data_inicio"
+                                    name="data_inicio"
+                                    value="{{ dados.data_inicio|default:'' }}"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-md-4">
+                                <label
+                                    for="data_fim"
+                                    class="form-label"
+                                >
+                                    Data de término
+                                </label>
+
+                                <input
+                                    type="date"
+                                    class="form-control"
+                                    id="data_fim"
+                                    name="data_fim"
+                                    value="{{ dados.data_fim|default:'' }}"
+                                >
+
+                                <div class="form-hint">
+                                    Deixe em branco se o vínculo estiver vigente.
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-notes me-2"></i>
+                            Observações
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <label for="observacoes" class="form-label">
+                            Informações complementares
+                        </label>
+
+                        <textarea
+                            class="form-control"
+                            id="observacoes"
+                            name="observacoes"
+                            rows="4"
+                            placeholder="Registre informações relevantes sobre o vínculo."
+                        >{{ dados.observacoes|default:'' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="d-flex justify-content-end gap-2 mb-4">
+                    <a
+                        href="{% url 'pets:editar' pet.id %}?aba=pessoas"
+                        class="btn btn-outline-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy me-1"></i>
+                        Associar pessoa
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Seletor de pessoas: conteúdo do Fancybox -->
+    <div
+        id="seletor-pessoas"
+        style="display: none; width: min(1100px, 95vw);"
+    >
+
+        <section class="resgatos-list-card card mb-0">
+
+            <div class="resgatos-list-header">
+                <div class="data-list-heading">
+                    <h2 class="data-list-title">Selecionar pessoa</h2>
+
+                    <p class="data-list-count">
+                        Exibindo {{ page_obj.start_index }}–{{ page_obj.end_index }}
+                        de {{ paginator.count }} pessoas
+                    </p>
+                </div>
+
+                <div class="resgatos-page-actions">
+                    <a
+                        href="{% url 'pessoas:adicionar' %}?origem=associar_pet_pessoa&pet_id={{ pet.id }}"
+                        class="btn btn-primary"
+                    >
+                        <i class="ti ti-plus me-1" aria-hidden="true"></i>
+                        Adicionar pessoa
+                    </a>
+                </div>
+            </div>
+
+            <div class="card-body border-bottom">
+                <form
+                    method="get"
+                    action="{% url 'pets:associar_pet_pessoa' pet.id %}"
+                    class="resgatos-filter-form"
+                >
+                    <div class="resgatos-search-row">
+                        <div class="resgatos-search-input">
+                            <label
+                                for="pessoa-search"
+                                class="visually-hidden"
+                            >
+                                Pesquisar pessoas
+                            </label>
+
+                            <i
+                                class="ti ti-search me-1"
+                                aria-hidden="true"
+                            ></i>
+
+                            <input
+                                type="hidden"
+                                name="seletor"
+                                value="1"
+                            >
+
+                            <input
+                                type="search"
+                                id="pessoa-search"
+                                name="busca"
+                                class="form-control"
+                                placeholder="Pesquisar por nome ou CPF..."
+                                value="{{ busca }}"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="por_pagina"
+                                value="{{ por_pagina }}"
+                            >
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="ti ti-search me-1"></i>
+                            Buscar
+                        </button>
+
+                        <a
+                            href="{% url 'pets:associar_pet_pessoa' pet.id %}?seletor=1"
+                            class="btn btn-outline-secondary"
+                        >
+                            <i class="ti ti-refresh me-1"></i>
+                            Limpar
+                        </a>
+                    </div>
+                </form>
+
+                {% if busca %}
+                    <div class="alert alert-primary mt-3 mb-0" role="status">
+                        <i class="ti ti-filter me-2" aria-hidden="true"></i>
+                        Resultados para <strong>{{ busca }}</strong>.
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-vcenter">
+                    <thead>
+                        <tr>
+                            <th scope="col">Pessoa</th>
+                            <th scope="col" class="text-center">CPF</th>
+                            <th scope="col" class="text-end">Ação</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for pessoa in pessoas %}
+                            <tr>
+                                <td>
+                                    <div class="resgatos-people-name">
+                                        {{ pessoa.nome }}
+                                    </div>
+                                </td>
+
+                                <td class="text-center">
+                                    {{ pessoa.cpf|default:"Não informado" }}
+                                </td>
+
+                                <td class="text-end">
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary js-selecionar-pessoa"
+                                        data-pessoa-id="{{ pessoa.id }}"
+                                        data-pessoa-nome="{{ pessoa.nome }}"
+                                    >
+                                        <i
+                                            class="ti ti-check me-1"
+                                            aria-hidden="true"
+                                        ></i>
+                                        Selecionar
+                                    </button>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td
+                                    colspan="3"
+                                    class="resgatos-empty-state"
+                                >
+                                    <i
+                                        class="ti ti-users"
+                                        aria-hidden="true"
+                                    ></i>
+
+                                    <p>Nenhuma pessoa encontrada.</p>
+
+                                    <span>
+                                        Ajuste a busca ou cadastre uma nova pessoa.
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if paginator.count %}
+                <footer class="resgatos-list-footer">
+                    <div class="data-list-footer">
+
+                        <div class="data-list-page-size">
+                            <form
+                                method="get"
+                                action="{% url 'pets:associar_pet_pessoa' pet.id %}"
+                                class="d-inline-flex align-items-center gap-2"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="busca"
+                                    value="{{ busca }}"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="seletor"
+                                    value="1"
+                                >
+
+                                <label for="por_pagina">
+                                    Exibir
+                                </label>
+
+                                <select
+                                    name="por_pagina"
+                                    id="por_pagina"
+                                    class="form-select"
+                                    onchange="this.form.submit()"
+                                >
+                                    <option value="10" {% if por_pagina == 10 %}selected{% endif %}>10</option>
+                                    <option value="20" {% if por_pagina == 20 %}selected{% endif %}>20</option>
+                                    <option value="50" {% if por_pagina == 50 %}selected{% endif %}>50</option>
+                                    <option value="100" {% if por_pagina == 100 %}selected{% endif %}>100</option>
+                                </select>
+
+                                <span>itens por página</span>
+                            </form>
+                        </div>
+
+                        <nav
+                            class="data-list-pagination"
+                            aria-label="Paginação de pessoas"
+                        >
+
+                            {% if page_obj.has_previous %}
+                                <a
+                                    href="?page={{ page_obj.previous_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&seletor=1"
+                                    class="data-list-page"
+                                    aria-label="Página anterior"
+                                >
+                                    <i
+                                        class="ti ti-chevron-left"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
+                            {% endif %}
+
+                            {% for numero in paginator.page_range %}
+                                {% if numero <= 5 or numero == paginator.num_pages or numero >= page_obj.number|add:"-1" and numero <= page_obj.number|add:"1" %}
+                                    <a
+                                        href="?page={{ numero }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&seletor=1"
+                                        class="data-list-page{% if numero == page_obj.number %} data-list-page-active{% endif %}"
+                                        {% if numero == page_obj.number %}aria-current="page"{% endif %}
+                                    >
+                                        {{ numero }}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <a
+                                    href="?page={{ page_obj.next_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&seletor=1"
+                                    class="data-list-page"
+                                    aria-label="Próxima página"
+                                >
+                                    <i
+                                        class="ti ti-chevron-right"
+                                        aria-hidden="true"
+                                    ></i>
+                                </a>
+                            {% endif %}
+
+                        </nav>
+                    </div>
+                </footer>
+            {% endif %}
+
+        </section>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const botaoAbrir = document.getElementById(
+        'btn-selecionar-pessoa'
+    );
+
+    const seletorPessoas = document.getElementById(
+        'seletor-pessoas'
+    );
+
+    const campoPessoaId = document.getElementById('pessoa_id');
+    const campoPessoaNome = document.getElementById(
+        'pessoa_selecionada'
+    );
+
+    if (!botaoAbrir || !seletorPessoas || !window.Fancybox) {
+        console.error(
+            'Não foi possível inicializar o seletor de pessoas.'
+        );
+        return;
+    }
+
+    // Abre o seletor quando o usuário clica no botão.
+    botaoAbrir.addEventListener('click', function () {
+        Fancybox.show([
+            {
+                src: '#seletor-pessoas',
+                type: 'inline'
+            }
+        ]);
+    });
+
+    // Reabre automaticamente após pesquisa ou paginação.
+    const parametros = new URLSearchParams(window.location.search);
+
+    if (parametros.get('seletor') === '1') {
+        Fancybox.show([
+            {
+                src: '#seletor-pessoas',
+                type: 'inline'
+            }
+        ]);
+    }
+
+    // Seleciona a pessoa e fecha o Fancybox.
+    seletorPessoas.addEventListener('click', function (event) {
+        const botao = event.target.closest(
+            '.js-selecionar-pessoa'
+        );
+
+        if (!botao) {
+            return;
+        }
+
+        campoPessoaId.value = botao.dataset.pessoaId;
+        campoPessoaNome.value = botao.dataset.pessoaNome;
+
+        Fancybox.close();
+    });
+});
+</script>
+
+{% endblock %}

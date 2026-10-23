@@ -243,6 +243,7 @@ $(document).ready(function () {
 
     // Fancybox - Visualização ampliada de fotos
     if (window.Fancybox) {
+
         Fancybox.bind('[data-fancybox="pet-photo"]', {
             Carousel: {
                 Thumbs: false,
@@ -282,6 +283,7 @@ $(document).ready(function () {
                 },
             },
         });
+
     }
 
 

@@ -7,9 +7,11 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch, Q
 from django.urls import reverse
 from django.db import transaction
+from django.views.decorators.http import require_POST
 from django.db.models import Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404, redirect, render
 from apps.resgates.models import Resgate
+from apps.pessoas.models import Pessoa
 
 from .models import Pet, PessoaPet, PetSituacao
 
@@ -159,6 +161,14 @@ def adicionar(request):
 def editar(request, pet_id):
     pet = get_object_or_404(Pet, pk=pet_id)
 
+    pessoas_relacionadas = PessoaPet.objects.filter(
+        pet=pet
+    ).select_related(
+        'pessoa'
+    ).order_by(
+        'pessoa__nome'
+    )
+
     aba = request.POST.get(
         'aba',
         request.GET.get('aba', '')
@@ -225,6 +235,7 @@ def editar(request, pet_id):
                     'dados': dados,
                     'resgates': resgates,
                     'situacoes': situacoes,
+                    'pessoas_relacionadas': pessoas_relacionadas,
                 },
             )
 
@@ -247,6 +258,7 @@ def editar(request, pet_id):
                     'dados': dados,
                     'resgates': resgates,
                     'situacoes': situacoes,
+                    'pessoas_relacionadas': pessoas_relacionadas,
                 },
             )
 
@@ -300,6 +312,7 @@ def editar(request, pet_id):
             'dados': dados,
             'resgates': resgates,
             'situacoes': situacoes,
+            'pessoas_relacionadas': pessoas_relacionadas,
         },
     )
 
@@ -493,4 +506,431 @@ def situacao_excluir(request, pet_id, situacao_id):
 
     return redirect(
         f"{reverse('pets:editar', args=[pet.id])}?aba=situacoes"
+    )
+
+
+
+@login_required
+def associar_pessoa(request, pessoa_id):
+    pessoa = get_object_or_404(Pessoa, pk=pessoa_id)
+
+    busca = request.GET.get('busca', '').strip()
+
+    try:
+        por_pagina = int(request.GET.get('por_pagina', 20))
+    except (TypeError, ValueError):
+        por_pagina = 20
+
+    if por_pagina not in (10, 20, 50, 100):
+        por_pagina = 20
+
+    pets = Pet.objects.filter(is_active=True)
+
+    if busca:
+        pets = pets.filter(
+            Q(nome__icontains=busca) |
+            Q(microchip__icontains=busca)
+        )
+
+    pets = pets.order_by('nome')
+
+    paginator = Paginator(pets, por_pagina)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    dados = {
+        'tipo_relacao': '',
+        'data_inicio': timezone.localdate().isoformat(),
+        'data_fim': '',
+        'observacoes': '',
+    }
+
+    pet_selecionado = None
+    erros = []
+
+    if request.method == 'POST':
+        dados = {
+            'tipo_relacao': request.POST.get(
+                'tipo_relacao', ''
+            ).strip(),
+            'data_inicio': request.POST.get(
+                'data_inicio', ''
+            ).strip(),
+            'data_fim': request.POST.get(
+                'data_fim', ''
+            ).strip(),
+            'observacoes': request.POST.get(
+                'observacoes', ''
+            ).strip(),
+        }
+
+        pet_id = request.POST.get('pet_id', '').strip()
+
+        try:
+            pet_selecionado = Pet.objects.get(
+                pk=pet_id,
+                is_active=True,
+            )
+        except (Pet.DoesNotExist, ValueError):
+            erros.append('Selecione um pet válido.')
+
+        if not dados['tipo_relacao']:
+            erros.append('Informe o tipo de relação.')
+
+        try:
+            data_inicio = date.fromisoformat(dados['data_inicio'])
+        except ValueError:
+            data_inicio = None
+            erros.append('Informe uma data de início válida.')
+
+        try:
+            data_fim = (
+                date.fromisoformat(dados['data_fim'])
+                if dados['data_fim']
+                else None
+            )
+        except ValueError:
+            data_fim = None
+            erros.append('Informe uma data de término válida.')
+
+        if data_inicio and data_fim and data_fim < data_inicio:
+            erros.append(
+                'A data de término não pode ser anterior à data de início.'
+            )
+
+        if pet_selecionado and PessoaPet.objects.filter(
+            pessoa=pessoa,
+            pet=pet_selecionado,
+            data_fim__isnull=True,
+        ).exists():
+            erros.append(
+                'Este pet já possui um vínculo vigente com esta pessoa.'
+            )
+
+        if not erros:
+            PessoaPet.objects.create(
+                pessoa=pessoa,
+                pet=pet_selecionado,
+                tipo_relacao=dados['tipo_relacao'],
+                data_inicio=data_inicio,
+                data_fim=data_fim,
+                observacoes=dados['observacoes'] or None,
+            )
+
+            messages.success(
+                request,
+                'Pet associado à pessoa com sucesso.',
+            )
+
+            return redirect(
+                f"{reverse('pessoas:editar', args=[pessoa.id])}?aba=pets"
+            )
+
+    return render(
+        request,
+        'pets/associar_pessoa.html',
+        {
+            'pessoa': pessoa,
+            'pets': page_obj.object_list,
+            'busca': busca,
+            'por_pagina': por_pagina,
+            'page_obj': page_obj,
+            'paginator': paginator,
+            'dados': dados,
+            'pet_selecionado': pet_selecionado,
+            'erros': erros,
+        },
+    )
+
+
+@login_required
+def editar_associacao(request, vinculo_id):
+    vinculo = get_object_or_404(
+        PessoaPet.objects.select_related('pessoa', 'pet'),
+        pk=vinculo_id,
+    )
+
+    pessoa = vinculo.pessoa
+    pet = vinculo.pet
+
+    origem = request.GET.get(
+        'origem',
+        request.POST.get('origem', 'pessoa')
+    )
+
+    if origem not in ('pessoa', 'pet'):
+        origem = 'pessoa'
+
+    dados = {
+        'tipo_relacao': vinculo.tipo_relacao,
+        'data_inicio': vinculo.data_inicio.isoformat(),
+        'data_fim': (
+            vinculo.data_fim.isoformat()
+            if vinculo.data_fim else ''
+        ),
+        'observacoes': vinculo.observacoes or '',
+    }
+
+    erros = []
+
+    if request.method == 'POST':
+        dados = {
+            'tipo_relacao': request.POST.get(
+                'tipo_relacao', ''
+            ).strip(),
+            'data_inicio': request.POST.get(
+                'data_inicio', ''
+            ).strip(),
+            'data_fim': request.POST.get(
+                'data_fim', ''
+            ).strip(),
+            'observacoes': request.POST.get(
+                'observacoes', ''
+            ).strip(),
+        }
+
+        if not dados['tipo_relacao']:
+            erros.append('Informe o tipo de relação.')
+
+        try:
+            data_inicio = date.fromisoformat(
+                dados['data_inicio']
+            )
+        except (ValueError, TypeError):
+            data_inicio = None
+            erros.append('Informe uma data de início válida.')
+
+        if dados['data_fim']:
+            try:
+                data_fim = date.fromisoformat(
+                    dados['data_fim']
+                )
+            except (ValueError, TypeError):
+                data_fim = None
+                erros.append('Informe uma data de término válida.')
+        else:
+            data_fim = None
+
+        if (
+            data_inicio
+            and data_fim
+            and data_fim < data_inicio
+        ):
+            erros.append(
+                'A data de término não pode ser anterior '
+                'à data de início.'
+            )
+
+        # Impede outro vínculo vigente para a mesma pessoa e pet.
+        if (
+            data_fim is None
+            and PessoaPet.objects.filter(
+                pessoa=vinculo.pessoa,
+                pet=vinculo.pet,
+                data_fim__isnull=True,
+            ).exclude(pk=vinculo.pk).exists()
+        ):
+            erros.append(
+                'Já existe um vínculo vigente entre esta '
+                'pessoa e este pet.'
+            )
+
+        if not erros:
+            vinculo.tipo_relacao = dados['tipo_relacao']
+            vinculo.data_inicio = data_inicio
+            vinculo.data_fim = data_fim
+            vinculo.observacoes = dados['observacoes'] or None
+
+            vinculo.save()
+
+            messages.success(
+                request,
+                'Vínculo atualizado com sucesso.',
+            )
+
+            if origem == 'pet':
+                return redirect(
+                    f"{reverse('pets:editar', args=[pet.id])}"
+                    "?aba=pessoas"
+                )
+
+            return redirect(
+                f"{reverse('pessoas:editar', args=[pessoa.id])}"
+                "?aba=pets"
+            )
+
+    return render(
+        request,
+        'pets/editar_associacao.html',
+        {
+            'vinculo': vinculo,
+            'pessoa': pessoa,
+            'pet': vinculo.pet,
+            'dados': dados,
+            'erros': erros,
+        },
+    )
+
+
+@login_required
+@require_POST
+def excluir_vinculo_pet(request, pessoa_id=None, vinculo_id=None):
+    origem = request.POST.get('origem', 'pessoa')
+
+    vinculo = get_object_or_404(
+        PessoaPet.objects.select_related('pessoa', 'pet'),
+        pk=vinculo_id,
+    )
+
+    if pessoa_id is not None and vinculo.pessoa_id != pessoa_id:
+        return redirect('pets:lista')
+
+    pessoa = vinculo.pessoa
+    pet = vinculo.pet
+
+    vinculo.delete()
+
+    messages.success(
+        request,
+        'Vínculo com o pet excluído com sucesso.',
+    )
+
+    if origem == 'pet':
+        return redirect(
+            f"{reverse('pets:editar', args=[pet.id])}?aba=pessoas"
+        )
+
+    return redirect(
+        f"{reverse('pessoas:editar', args=[pessoa.id])}?aba=pets"
+    )
+
+
+@login_required
+def associar_pet_pessoa(request, pet_id):
+    pet = get_object_or_404(Pet, pk=pet_id)
+
+    busca = request.GET.get('busca', '').strip()
+
+    try:
+        por_pagina = int(request.GET.get('por_pagina', 20))
+    except (TypeError, ValueError):
+        por_pagina = 20
+
+    if por_pagina not in (10, 20, 50, 100):
+        por_pagina = 20
+
+    pessoas = Pessoa.objects.filter(is_active=True)
+
+    if busca:
+        pessoas = pessoas.filter(
+            Q(nome__icontains=busca) |
+            Q(cpf__icontains=busca)
+        )
+
+    pessoas = pessoas.order_by('nome')
+
+    paginator = Paginator(pessoas, por_pagina)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    dados = {
+        'tipo_relacao': '',
+        'data_inicio': timezone.localdate().isoformat(),
+        'data_fim': '',
+        'observacoes': '',
+    }
+
+    pessoa_selecionada = None
+    erros = []
+
+    if request.method == 'POST':
+        dados = {
+            'tipo_relacao': request.POST.get(
+                'tipo_relacao', ''
+            ).strip(),
+            'data_inicio': request.POST.get(
+                'data_inicio', ''
+            ).strip(),
+            'data_fim': request.POST.get(
+                'data_fim', ''
+            ).strip(),
+            'observacoes': request.POST.get(
+                'observacoes', ''
+            ).strip(),
+        }
+
+        pessoa_id = request.POST.get('pessoa_id', '').strip()
+
+        try:
+            pessoa_selecionada = Pessoa.objects.get(
+                pk=pessoa_id,
+                is_active=True,
+            )
+        except (Pessoa.DoesNotExist, ValueError):
+            erros.append('Selecione uma pessoa válida.')
+
+        if not dados['tipo_relacao']:
+            erros.append('Informe o tipo de relação.')
+
+        try:
+            data_inicio = date.fromisoformat(dados['data_inicio'])
+        except (ValueError, TypeError):
+            data_inicio = None
+            erros.append('Informe uma data de início válida.')
+
+        try:
+            data_fim = (
+                date.fromisoformat(dados['data_fim'])
+                if dados['data_fim']
+                else None
+            )
+        except (ValueError, TypeError):
+            data_fim = None
+            erros.append('Informe uma data de término válida.')
+
+        if data_inicio and data_fim and data_fim < data_inicio:
+            erros.append(
+                'A data de término não pode ser anterior à data de início.'
+            )
+
+        if pessoa_selecionada and PessoaPet.objects.filter(
+            pessoa=pessoa_selecionada,
+            pet=pet,
+            data_fim__isnull=True,
+        ).exists():
+            erros.append(
+                'Esta pessoa já possui um vínculo vigente com este pet.'
+            )
+
+        if not erros:
+            PessoaPet.objects.create(
+                pessoa=pessoa_selecionada,
+                pet=pet,
+                tipo_relacao=dados['tipo_relacao'],
+                data_inicio=data_inicio,
+                data_fim=data_fim,
+                observacoes=dados['observacoes'] or None,
+            )
+
+            messages.success(
+                request,
+                'Pessoa associada ao pet com sucesso.',
+            )
+
+            return redirect(
+                f"{reverse('pets:editar', args=[pet.id])}?aba=pessoas"
+            )
+
+    return render(
+        request,
+        'pets/associar_pet_pessoa.html',
+        {
+            'pet': pet,
+            'pessoas': page_obj.object_list,
+            'busca': busca,
+            'por_pagina': por_pagina,
+            'page_obj': page_obj,
+            'paginator': paginator,
+            'dados': dados,
+            'pessoa_selecionada': pessoa_selecionada,
+            'erros': erros,
+        },
     )

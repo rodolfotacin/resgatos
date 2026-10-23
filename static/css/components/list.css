@@ -239,8 +239,8 @@
 .resgatos-people-avatar,
 .resgatos-pets-photo,
 .resgatos-pets-avatar {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
     display: flex;
@@ -499,13 +499,14 @@
 /* PETS LIST */
 .resgatos-pet-photo,
 .resgatos-pet-avatar {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     object-fit: cover;
     display: flex;
     align-items: center;
     justify-content: center;
+    max-width: inherit;
 }
 
 .resgatos-pet-photo {

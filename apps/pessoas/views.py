@@ -5,12 +5,14 @@ from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.db import IntegrityError, transaction
+from django.db.models import Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from django.urls import reverse
 
 from .models import Pessoa, Usuario
+from apps.pets.models import PessoaPet
 
 
 def login_view(request):
@@ -216,6 +218,16 @@ def adicionar(request):
 def editar(request, pessoa_id):
     pessoa = get_object_or_404(Pessoa, pk=pessoa_id)
 
+    pessoas_pets = PessoaPet.objects.filter(
+        pessoa=pessoa
+    ).annotate(
+        prioridade=Case(
+            When(data_fim__isnull=True, then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField(),
+        )
+    ).order_by('prioridade', '-data_inicio', '-id')
+
     usuario = Usuario.objects.filter(pessoa=pessoa).first()
     eh_proprio_perfil = (
         pessoa.id == request.user.pessoa_id
@@ -269,6 +281,7 @@ def editar(request, pessoa_id):
                     'usuario': usuario,
                     'possui_acesso': possui_acesso,
                     'usuario_is_active': usuario_is_active,
+                    'pessoas_pets': pessoas_pets,
                 }
             )
 
@@ -287,6 +300,7 @@ def editar(request, pessoa_id):
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
                         'usuario_is_active': usuario_is_active,
+                        'pessoas_pets': pessoas_pets,
                     }
                 )
 
@@ -304,6 +318,7 @@ def editar(request, pessoa_id):
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
                         'usuario_is_active': usuario_is_active,
+                        'pessoas_pets': pessoas_pets,
                     }
                 )
 
@@ -321,6 +336,7 @@ def editar(request, pessoa_id):
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
                         'usuario_is_active': usuario_is_active,
+                        'pessoas_pets': pessoas_pets,
                     }
                 )
 
@@ -339,6 +355,7 @@ def editar(request, pessoa_id):
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
                         'usuario_is_active': usuario_is_active,
+                        'pessoas_pets': pessoas_pets,
                     }
                 )
 
@@ -356,6 +373,7 @@ def editar(request, pessoa_id):
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
                         'usuario_is_active': usuario_is_active,
+                        'pessoas_pets': pessoas_pets,
                     }
                 )
 
@@ -433,6 +451,7 @@ def editar(request, pessoa_id):
                     'usuario': usuario,
                     'possui_acesso': possui_acesso,
                     'usuario_is_active': usuario_is_active,
+                    'pessoas_pets': pessoas_pets,
                 }
             )
 
@@ -463,6 +482,7 @@ def editar(request, pessoa_id):
             'usuario_is_active': (
                 usuario.is_active if usuario else False
             ),
+            'pessoas_pets': pessoas_pets,
         }
     )
 

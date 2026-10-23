@@ -1,6 +1,7 @@
 
 {% extends 'base/app.html' %}
 {% load static %}
+{% load text_tags %}
 
 {% block content %}
 
@@ -540,24 +541,144 @@
                         aria-labelledby="tab-pessoas"
                         tabindex="0"
                     >
-                        <div class="mb-3">
-                            <h3 class="card-title">Pessoas relacionadas</h3>
-                            <p class="text-secondary">
-                                Pessoas vinculadas a este pet.
-                            </p>
-                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="ti ti-users me-2"></i>
+                                    Pessoas relacionadas
+                                </h3>
 
-                        <div class="empty">
-                            <div class="empty-icon">
-                                <i class="ti ti-users"></i>
+                                <div class="card-actions">
+                                    <a
+                                        href="{% url 'pets:associar_pet_pessoa' pet.id %}"
+                                        class="btn btn-primary"
+                                    >
+                                        <i class="ti ti-plus me-1"></i>
+                                        Associar pessoa
+                                    </a>
+                                </div>
                             </div>
-                            <p class="empty-title">
-                                Pessoas relacionadas
-                            </p>
-                            <p class="empty-subtitle text-secondary">
-                                A consulta e o gerenciamento dos vínculos
-                                serão implementados nesta guia.
-                            </p>
+
+                            <div class="table-responsive">
+                                <table class="table table-vcenter">
+                                    <thead>
+                                        <tr>
+                                            <th>Pessoa</th>
+                                            <th>Tipo de relação</th>
+                                            <th class="text-center">Data de início</th>
+                                            <th class="text-center">Data de término</th>
+                                            <th class="w-1">Ações</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% for item in pessoas_relacionadas %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        {% if item.pessoa.foto %}
+                                                            <a
+                                                                href="{{ item.pessoa.foto.url }}"
+                                                                data-fancybox="pessoa-photo"
+                                                                data-caption="{{ item.pessoa.nome }}"
+                                                                aria-label="Ampliar foto de {{ item.pessoa.nome }}"
+                                                            >
+                                                                <img
+                                                                    src="{{ item.pessoa.foto.url }}"
+                                                                    alt="Foto de {{ item.pessoa.nome }}"
+                                                                    class="resgatos-people-photo"
+                                                                    loading="lazy"
+                                                                >
+                                                            </a>
+                                                        {% else %}
+                                                            <div class="resgatos-people-avatar" aria-label="Pessoa sem foto">
+                                                                <div class="alpha-init">{{ item.pessoa.nome|initials }}</div>
+                                                            </div>
+                                                        {% endif %}
+
+                                                        <div>
+                                                            <div class="fw-semibold">
+                                                                {{ item.pessoa.nome }}
+                                                            </div>
+
+                                                            <div class="text-secondary small">
+                                                                CPF:
+                                                                {{ item.pessoa.cpf|default:"Não informado" }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td>{{ item.tipo_relacao }}</td>
+
+                                                <td class="text-center">
+                                                    {{ item.data_inicio|date:"d/m/Y" }}
+                                                </td>
+
+                                                <td class="text-center">
+                                                    {% if item.data_fim %}
+                                                        {{ item.data_fim|date:"d/m/Y" }}
+                                                    {% else %}
+                                                        <span class="text-secondary">
+                                                            Vigente
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    <div class="resgatos-row-actions">
+                                                        <a
+                                                            href="{% url 'pets:editar_associacao' item.id %}?origem=pet"
+                                                            class="btn btn-outline-secondary btn-icon"
+                                                            title="Editar vínculo"
+                                                            aria-label="Editar vínculo de {{ item.pessoa.nome }}"
+                                                        >
+                                                            <i class="ti ti-pencil" aria-hidden="true"></i>
+                                                        </a>
+                                                        <form
+                                                            method="post"
+                                                            action="{% url 'pets:excluir_vinculo_pet_pet' item.id %}"
+                                                            class="d-inline js-form-inativar"
+                                                            data-nome="vínculo de {{ item.pessoa.nome }} com {{ pet.nome }}"
+                                                        >
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="origem" value="pet">
+
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-icon btn-outline-secondary js-inativar"
+                                                                title="Excluir vínculo"
+                                                                aria-label="Excluir vínculo"
+                                                            >
+                                                                <i class="ti ti-trash" aria-hidden="true"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="4">
+                                                    <div class="empty py-4">
+                                                        <div class="empty-icon">
+                                                            <i class="ti ti-users"></i>
+                                                        </div>
+
+                                                        <p class="empty-title">
+                                                            Nenhuma pessoa relacionada
+                                                        </p>
+
+                                                        <p class="empty-subtitle text-secondary">
+                                                            Este pet ainda não possui pessoas vinculadas.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -607,6 +728,8 @@
                                                 <td class="text-center">
                                                     {% if not item.data_fim %}
                                                         <i class="ti ti-circle active-status"></i>
+                                                    {% else %}
+                                                        <i class="ti ti-flag"></i>
                                                     {% endif %}
                                                 </td>
 

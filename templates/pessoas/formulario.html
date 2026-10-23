@@ -52,7 +52,7 @@
 
     {% if pessoa %}
         <!-- Identificação da pessoa -->
-        <div class="card mb-3">
+        <div class="card mb-1">
             <div class="card-body py-3">
                 <div class="d-flex align-items-center gap-3">
 
@@ -624,43 +624,155 @@
                     </form>
                 </div>
 
+
                 {% if pessoa %}
-                <div
+                    <div
                         class="tab-pane fade"
                         id="conteudo-pets"
                         role="tabpanel"
                         aria-labelledby="tab-pets"
                         tabindex="0"
-                >
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <h3 class="card-title mb-1">Pets associados</h3>
-                            <p class="text-secondary mb-0">
-                                Pets vinculados a esta pessoa.
-                            </p>
-                        </div>
+                    >
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="ti ti-paw me-2"></i>
+                                    Pets associados
+                                </h3>
 
-                        <a
-                                href="{% url 'pets:lista' %}"
-                                class="btn btn-outline-primary"
-                        >
-                            <i class="ti ti-search me-1"></i>
-                            Consultar pets
-                        </a>
-                    </div>
+                                <div class="card-actions">
+                                    <a
+                                        href="{% url 'pets:associar_pessoa' pessoa.id %}"
+                                        class="btn btn-primary"
+                                    >
+                                        <i class="ti ti-plus me-1"></i>
+                                        Associar pet
+                                    </a>
+                                </div>
+                            </div>
 
-                    <div class="empty">
-                        <div class="empty-icon">
-                            <i class="ti ti-paw"></i>
+                            <div class="table-responsive">
+                                <table class="table table-vcenter">
+                                    <thead>
+                                        <tr>
+                                            <th>Pet</th>
+                                            <th>Tipo de relação</th>
+                                            <th class="text-center">Data de início</th>
+                                            <th class="text-center">Data de término</th>
+                                            <th class="w-1">Ações</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% for item in pessoas_pets %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    {% if item.pet.foto %}
+                                                    <a
+                                                        href="{{ item.pet.foto.url }}"
+                                                        data-fancybox="pet-photo"
+                                                        data-caption="{{ item.pet.nome }}"
+                                                        aria-label="Ampliar foto de {{ item.pet.nome }}"
+                                                    >
+                                                        <img
+                                                            src="{{ item.pet.foto.url }}"
+                                                            alt="Foto de {{ item.pet.nome }}"
+                                                            class="resgatos-pet-photo"
+                                                            loading="lazy"
+                                                        >
+                                                    </a>
+                                                    {% else %}
+                                                    <span class="resgatos-pet-avatar">
+                                                        <i class="ti ti-paw"></i>
+                                                    </span>
+                                                    {% endif %}
+
+                                                    <div>
+                                                        <div class="fw-semibold">
+                                                            {{ item.pet.nome }}
+                                                        </div>
+
+                                                        <div class="text-secondary small">
+                                                            Microchip:
+                                                            {{ item.pet.microchip|default:"Não informado" }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+
+                                            <td>{{ item.tipo_relacao }}</td>
+
+                                            <td class="text-center">
+                                                {{ item.data_inicio|date:"d/m/Y" }}
+                                            </td>
+
+                                            <td class="text-center">
+                                                {% if item.data_fim %}
+                                                    {{ item.data_fim|date:"d/m/Y" }}
+                                                {% else %}
+                                                    <span class="text-secondary">
+                                                        Vigente
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+
+                                            <td>
+                                                <div class="resgatos-row-actions">
+                                                    <a
+                                                        href="{% url 'pets:editar_associacao' item.id %}"
+                                                        class="btn btn-outline-secondary btn-icon"
+                                                        title="Editar vínculo"
+                                                        aria-label="Editar vínculo de {{ item.pet.nome }}"
+                                                    >
+                                                        <i class="ti ti-pencil" aria-hidden="true"></i>
+                                                    </a>
+                                                    <form
+                                                        method="post"
+                                                        action="{% url 'pets:excluir_vinculo_pet' pessoa.id item.id %}"
+                                                        class="d-inline js-form-inativar"
+                                                        data-nome="vínculo de {{ item.pet.nome }} com {{ pessoa.nome }}"
+                                                    >
+                                                        {% csrf_token %}
+
+                                                        <button
+                                                            type="button"
+                                                            class="btn btn-icon btn-outline-secondary js-inativar"
+                                                            title="Excluir vínculo"
+                                                            aria-label="Excluir vínculo"
+                                                        >
+                                                            <i class="ti ti-trash" aria-hidden="true"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="empty">
+                                                    <div class="empty-icon">
+                                                        <i class="ti ti-paw"></i>
+                                                    </div>
+
+                                                    <p class="empty-title">
+                                                        Nenhum pet associado
+                                                    </p>
+
+                                                    <p class="empty-subtitle text-secondary">
+                                                        Esta pessoa ainda não possui pets vinculados.
+                                                    </p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                        <p class="empty-title">Associações em desenvolvimento</p>
-                        <p class="empty-subtitle text-secondary">
-                            Nesta etapa, vamos preparar a listagem dos pets
-                            e as ações para associar ou cadastrar um novo pet.
-                        </p>
                     </div>
-                </div>
                 {% endif %}
+
             </div>
         </div>
     </div>
@@ -669,5 +781,76 @@
 
 
 {% block scripts %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const nomesAbas = {
+            'tab-cadastro': 'cadastro',
+            'tab-pets': 'pets'
+        };
+
+        function abrirAba(idBotao) {
+            const botao = document.getElementById(idBotao);
+
+            if (!botao) return;
+
+            // Atualiza os botões.
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (item) {
+                const ativo = item === botao;
+
+                item.classList.toggle('active', ativo);
+                item.setAttribute('aria-selected', ativo ? 'true' : 'false');
+            });
+
+            // Atualiza os conteúdos.
+            Object.keys(nomesAbas).forEach(function (id) {
+                const item = document.getElementById(
+                    'conteudo-' + nomesAbas[id]
+                );
+
+                if (!item) return;
+
+                const ativo = id === idBotao;
+
+                item.classList.toggle('active', ativo);
+                item.classList.toggle('show', ativo);
+            });
+        }
+
+        // Restaura a aba indicada na URL.
+        const parametros = new URLSearchParams(window.location.search);
+        const aba = parametros.get('aba') || 'cadastro';
+
+        const idBotao = Object.keys(nomesAbas).find(function (id) {
+            return nomesAbas[id] === aba;
+        });
+
+        if (idBotao) {
+            abrirAba(idBotao);
+        }
+
+        // Atualiza a URL quando o usuário troca de aba.
+        document.querySelectorAll('[data-bs-toggle="tab"]').forEach(function (botao) {
+            botao.addEventListener('click', function () {
+                const nomeAba = nomesAbas[this.id];
+
+                if (!nomeAba) return;
+
+                abrirAba(this.id);
+
+                const url = new URL(window.location.href);
+
+                if (nomeAba === 'cadastro') {
+                    url.searchParams.delete('aba');
+                } else {
+                    url.searchParams.set('aba', nomeAba);
+                }
+
+                window.history.replaceState({}, '', url);
+            });
+        });
+    });
+</script>
 <script src="{% static 'vendor/intl-tel-input/js/intlTelInput.min.js' %}"></script>
+
 {% endblock %}

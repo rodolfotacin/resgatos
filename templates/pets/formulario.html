@@ -531,6 +531,7 @@
 
                 {% if pet %}
 
+
                     <!-- PESSOAS RELACIONADAS -->
                     <div
                         class="tab-pane fade"
@@ -560,6 +561,7 @@
                         </div>
                     </div>
 
+
                     <!-- SITUAÇÕES -->
                     <div
                         class="tab-pane fade"
@@ -568,17 +570,127 @@
                         aria-labelledby="tab-situacoes"
                         tabindex="0"
                     >
-                        <div class="empty">
-                            <div class="empty-icon">
-                                <i class="ti ti-activity"></i>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="ti ti-activity me-2"></i>
+                                    Histórico de situações
+                                </h3>
+
+                                <div class="card-actions">
+                                    <a
+                                        href="{% url 'pets:situacao_adicionar' pet.id %}"
+                                        class="btn btn-primary"
+                                    >
+                                        <i class="ti ti-plus me-1"></i>
+                                        Nova situação
+                                    </a>
+                                </div>
                             </div>
-                            <p class="empty-title">Situações do pet</p>
-                            <p class="empty-subtitle text-secondary">
-                                O histórico de situações será implementado
-                                nesta guia.
-                            </p>
+
+                            <div class="table-responsive">
+                                <table class="table table-vcenter">
+                                    <thead>
+                                        <tr>
+                                            <th>&nbsp;</th>
+                                            <th>Situação</th>
+                                            <th class="text-center">Data de início</th>
+                                            <th class="text-center">Data de encerramento</th>
+                                            <th>Observações</th>
+                                            <th class="w-1">Ações</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% for item in situacoes %}
+                                            <tr>
+                                                <td class="text-center">
+                                                    {% if not item.data_fim %}
+                                                        <i class="ti ti-circle active-status"></i>
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    <span class="fw-semibold">
+                                                        {{ item.situacao }}
+                                                    </span>
+                                                </td>
+
+                                                <td class="text-center">
+                                                    {{ item.data_inicio|date:"d/m/Y" }}
+                                                </td>
+
+                                                <td class="text-center">
+                                                    {% if item.data_fim %}
+                                                        {{ item.data_fim|date:"d/m/Y" }}
+                                                    {% else %}
+                                                        <span class="text-secondary">
+                                                            Em andamento
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+
+                                                <td>
+                                                    {{ item.observacoes|default:"—"|truncatechars:80 }}
+                                                </td>
+
+                                                <td>
+                                                    <div class="resgatos-row-actions">
+                                                        <a
+                                                            href="{% url 'pets:situacao_editar' pet.id item.id %}"
+                                                            class="btn btn-outline-secondary btn-icon"
+                                                            title="Editar situação"
+                                                            aria-label="Editar situação {{ item.situacao }}"
+                                                        >
+                                                            <i class="ti ti-pencil"
+                                                               aria-hidden="true"></i>
+                                                        </a>
+                                                        <form
+                                                            method="post"
+                                                            action="{% url 'pets:situacao_excluir' pet.id item.id %}"
+                                                            class="d-inline js-form-inativar"
+                                                            data-nome="situação '{{ item.situacao }}'"
+                                                        >
+                                                            {% csrf_token %}
+
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-icon btn-outline-secondary js-inativar"
+                                                                title="Excluir situação"
+                                                                aria-label="Excluir situação"
+                                                            >
+                                                                <i class="ti ti-trash" aria-hidden="true"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center py-5">
+                                                    <div class="empty">
+                                                        <div class="empty-icon">
+                                                            <i class="ti ti-clipboard-list"></i>
+                                                        </div>
+
+                                                        <p class="empty-title">
+                                                            Nenhuma situação registrada
+                                                        </p>
+
+                                                        <p class="empty-subtitle text-secondary">
+                                                            Cadastre uma situação para iniciar
+                                                            o histórico deste pet.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+
 
                     <!-- RESGATES  -->
                     <div
@@ -590,7 +702,10 @@
                     >
                         <div class="card">
                             <div class="card-header">
-                                <h3 class="card-title">Histórico de resgates</h3>
+                                <h3 class="card-title">
+                                    <i class="ti ti-ambulance me-2"></i>
+                                    Histórico de resgates
+                                </h3>
 
                                 <div class="card-actions">
                                     <a
@@ -671,6 +786,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <!-- ATENDIMENTOS -->
                     <div

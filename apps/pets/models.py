@@ -110,3 +110,34 @@ class PessoaPet(models.Model):
 
     def __str__(self):
         return f'{self.pessoa.nome} - {self.pet.nome}'
+
+
+class PetSituacao(models.Model):
+    id = models.AutoField(primary_key=True)
+
+    situacao = models.CharField(max_length=50)
+    data_inicio = models.DateField()
+    data_fim = models.DateField(
+        blank=True,
+        null=True,
+    )
+    observacoes = models.TextField(
+        blank=True,
+        null=True,
+    )
+
+    pet = models.ForeignKey(
+        Pet,
+        on_delete=models.PROTECT,
+        related_name='situacoes',
+        db_column='pet_id',
+    )
+
+    class Meta:
+        db_table = 'pet_situacao'
+        verbose_name = 'Situação do pet'
+        verbose_name_plural = 'Situações do pet'
+        ordering = ['-data_inicio', '-id']
+
+    def __str__(self):
+        return f'{self.pet.nome} - {self.situacao}'

@@ -177,6 +177,37 @@
 
             <div class="resgatos-topbar-right">
 
+                <!-- ACESSIBILIDADE -->
+                <div class="resgatos-accessibility"
+                     role="group"
+                     aria-label="Controles de acessibilidade">
+
+                    <button type="button"
+                            id="diminuir-fonte"
+                            class="resgatos-accessibility-button"
+                            aria-label="Diminuir tamanho do texto"
+                            title="Diminuir texto">
+                        A−
+                    </button>
+
+                    <button type="button"
+                            id="aumentar-fonte"
+                            class="resgatos-accessibility-button"
+                            aria-label="Aumentar tamanho do texto"
+                            title="Aumentar texto">
+                        A+
+                    </button>
+
+                    <button type="button"
+                            id="restaurar-fonte"
+                            class="resgatos-accessibility-button"
+                            aria-label="Restaurar tamanho original do texto"
+                            title="Restaurar tamanho original">
+                        A
+                    </button>
+
+                </div>
+
                 <!-- USER -->
                 <div class="resgatos-user">
                     <div class="resgatos-avatar resgatos-avatar-top">
@@ -257,8 +288,9 @@
 <script src="{% static 'vendor/sweetalert2/js/sweetalert2.all.min.js' %}"></script>
 <script src="{% static 'vendor/fancybox/js/fancybox.umd.js' %}"></script>
 
-<script src="{% static 'js/formulario.js' %}"></script>
-<script src="{% static 'js/mensagens.js' %}"></script>
+<script src="{% static 'js/forms.js' %}"></script>
+<script src="{% static 'js/messages.js' %}"></script>
+<script src="{% static 'js/accessibility.js' %}"></script>
 
 {% block scripts %}{% endblock %}
 

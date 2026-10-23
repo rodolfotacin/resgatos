@@ -1,4 +1,5 @@
 from datetime import date
+from django.utils import timezone
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -6,10 +7,11 @@ from django.core.paginator import Paginator
 from django.db.models import Prefetch, Q
 from django.urls import reverse
 from django.db import transaction
+from django.db.models import Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404, redirect, render
 from apps.resgates.models import Resgate
 
-from .models import Pet, PessoaPet
+from .models import Pet, PessoaPet, PetSituacao
 
 
 @login_required
@@ -181,6 +183,16 @@ def editar(request, pet_id):
         is_active=True
     ).order_by('-data_resgate', '-id')
 
+    situacoes = PetSituacao.objects.filter(
+        pet=pet
+    ).annotate(
+        prioridade=Case(
+            When(data_fim__isnull=True, then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField(),
+        )
+    ).order_by('prioridade', '-data_inicio', '-id')
+
     if request.method == 'POST':
         dados = {
             'nome': request.POST.get('nome', '').strip(),
@@ -212,6 +224,7 @@ def editar(request, pet_id):
                     'pet': pet,
                     'dados': dados,
                     'resgates': resgates,
+                    'situacoes': situacoes,
                 },
             )
 
@@ -233,6 +246,7 @@ def editar(request, pet_id):
                     'pet': pet,
                     'dados': dados,
                     'resgates': resgates,
+                    'situacoes': situacoes,
                 },
             )
 
@@ -285,5 +299,198 @@ def editar(request, pet_id):
             'pet': pet,
             'dados': dados,
             'resgates': resgates,
+            'situacoes': situacoes,
         },
+    )
+
+
+@login_required
+def situacao_adicionar(request, pet_id):
+    pet = get_object_or_404(Pet, pk=pet_id)
+
+    dados = {
+        'situacao': '',
+        'data_inicio': timezone.localdate().isoformat(),
+        'data_fim': '',
+        'observacoes': '',
+    }
+
+    erros = []
+
+    if request.method == 'POST':
+        dados = {
+            'situacao': request.POST.get('situacao', '').strip(),
+            'data_inicio': request.POST.get('data_inicio', '').strip(),
+            'data_fim': request.POST.get('data_fim', '').strip(),
+            'observacoes': request.POST.get('observacoes', '').strip(),
+        }
+
+        situacao = dados['situacao']
+        data_inicio_str = dados['data_inicio']
+        data_fim_str = dados['data_fim']
+        observacoes = dados['observacoes'] or None
+
+        if not situacao:
+            erros.append('Informe a situação do pet.')
+
+        try:
+            data_inicio = date.fromisoformat(data_inicio_str)
+        except ValueError:
+            data_inicio = None
+            erros.append('Informe uma data de início válida.')
+
+        try:
+            data_fim = (
+                date.fromisoformat(data_fim_str)
+                if data_fim_str else None
+            )
+        except ValueError:
+            data_fim = None
+            erros.append('Informe uma data final válida.')
+
+        if data_inicio and data_fim and data_fim < data_inicio:
+            erros.append(
+                'A data final não pode ser anterior à data de início.'
+            )
+
+        if not erros:
+            PetSituacao.objects.create(
+                pet=pet,
+                situacao=situacao,
+                data_inicio=data_inicio,
+                data_fim=data_fim,
+                observacoes=observacoes,
+            )
+
+            messages.success(
+                request,
+                'Situação registrada com sucesso.'
+            )
+
+            return redirect(
+                f"{reverse('pets:editar', args=[pet.id])}?aba=situacoes"
+            )
+
+    return render(
+        request,
+        'pets/situacoes/formulario.html',
+        {
+            'pet': pet,
+            'dados': dados,
+            'erros': erros,
+        }
+    )
+
+
+@login_required
+def situacao_editar(request, pet_id, situacao_id):
+    pet = get_object_or_404(Pet, pk=pet_id)
+
+    situacao_pet = get_object_or_404(
+        PetSituacao,
+        pk=situacao_id,
+        pet=pet,
+    )
+
+    if request.method == 'POST':
+        descricao = request.POST.get('situacao', '').strip()
+        data_inicio_str = request.POST.get('data_inicio', '').strip()
+        data_fim_str = request.POST.get('data_fim', '').strip()
+        observacoes = request.POST.get('observacoes', '').strip() or None
+
+        erros = []
+
+        if not descricao:
+            erros.append('Informe a situação do pet.')
+
+        try:
+            data_inicio = date.fromisoformat(data_inicio_str)
+        except ValueError:
+            data_inicio = None
+            erros.append('Informe uma data de início válida.')
+
+        try:
+            data_fim = date.fromisoformat(data_fim_str) if data_fim_str else None
+        except ValueError:
+            data_fim = None
+            erros.append('Informe uma data final válida.')
+
+        if data_inicio and data_fim and data_fim < data_inicio:
+            erros.append('A data final não pode ser anterior à data de início.')
+
+        if erros:
+            dados = {
+                'situacao': descricao,
+                'data_inicio': data_inicio_str,
+                'data_fim': data_fim_str,
+                'observacoes': observacoes or '',
+            }
+
+            return render(
+                request,
+                'pets/situacoes/formulario.html',
+                {
+                    'pet': pet,
+                    'situacao_obj': situacao_pet,
+                    'dados': dados,
+                    'erros': erros,
+                },
+            )
+
+        situacao_pet.situacao = descricao
+        situacao_pet.data_inicio = data_inicio
+        situacao_pet.data_fim = data_fim
+        situacao_pet.observacoes = observacoes
+        situacao_pet.save()
+
+        messages.success(request, 'Situação atualizada com sucesso.')
+
+        return redirect(
+            f"{reverse('pets:editar', args=[pet.id])}?aba=situacoes"
+        )
+
+    dados = {
+        'situacao': situacao_pet.situacao,
+        'data_inicio': situacao_pet.data_inicio.isoformat(),
+        'data_fim': (
+            situacao_pet.data_fim.isoformat()
+            if situacao_pet.data_fim
+            else ''
+        ),
+        'observacoes': situacao_pet.observacoes or '',
+    }
+
+    return render(
+        request,
+        'pets/situacoes/formulario.html',
+        {
+            'pet': pet,
+            'situacao_obj': situacao_pet,
+            'dados': dados,
+            'erros': [],
+        },
+    )
+
+
+@login_required
+def situacao_excluir(request, pet_id, situacao_id):
+    if request.method != 'POST':
+        return redirect(
+            f"{reverse('pets:editar', args=[pet_id])}?aba=situacoes"
+        )
+
+    pet = get_object_or_404(Pet, pk=pet_id)
+
+    situacao_pet = get_object_or_404(
+        PetSituacao,
+        pk=situacao_id,
+        pet=pet,
+    )
+
+    situacao_pet.delete()
+
+    messages.success(request, 'Situação excluída com sucesso.')
+
+    return redirect(
+        f"{reverse('pets:editar', args=[pet.id])}?aba=situacoes"
     )

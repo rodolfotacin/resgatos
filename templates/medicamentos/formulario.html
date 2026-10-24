@@ -1,0 +1,311 @@
+
+{% extends 'base/app.html' %}
+{% load static %}
+
+{% block title %}
+    {% if medicamento %}
+        Editar medicamento | Resgatos
+    {% else %}
+        Cadastrar medicamento | Resgatos
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div class="resgatos-page resgatos-medications">
+
+    <!-- Cabeçalho -->
+    <header class="resgatos-page-header">
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-vaccine"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">Medicamentos</h1>
+                <p class="resgatos-page-description">
+                    {% if medicamento %}
+                        Editar medicamento
+                    {% else %}
+                        Cadastrar medicamento
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
+            <a href="{% url 'inicio' %}">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <a href="{% url 'medicamentos:lista' %}">
+                <i class="ti ti-vaccine" aria-hidden="true"></i>
+                Medicamentos
+            </a>
+
+            <span aria-hidden="true">/</span>
+            <span>
+                {% if medicamento %}Editar medicamento{% else %}Novo medicamento{% endif %}
+            </span>
+        </nav>
+    </header>
+
+    <!-- Formulário -->
+    <div class="card mb-4">
+
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="ti ti-clipboard-list me-2"></i>
+                Dados do medicamento
+            </h2>
+        </div>
+
+        <div class="card-body">
+
+            <form
+                method="post"
+                data-modo="{% if medicamento %}editar{% else %}adicionar{% endif %}"
+                novalidate
+            >
+                {% csrf_token %}
+
+                <!-- Identificação -->
+                <div class="card mb-4">
+
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-id me-2"></i>
+                            Identificação
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-8">
+                                <label for="nome" class="form-label">
+                                    Nome do medicamento
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="nome"
+                                    name="nome"
+                                    maxlength="100"
+                                    value="{{ dados.nome|default:'' }}"
+                                    placeholder="Nome do medicamento"
+                                    required
+                                    autofocus
+                                >
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="fabricante" class="form-label">
+                                    Fabricante
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="fabricante"
+                                    name="fabricante"
+                                    maxlength="45"
+                                    value="{{ dados.fabricante|default:'' }}"
+                                    placeholder="Fabricante"
+                                >
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="principio_ativo" class="form-label">
+                                    Princípio ativo
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="principio_ativo"
+                                    name="principio_ativo"
+                                    maxlength="150"
+                                    value="{{ dados.principio_ativo|default:'' }}"
+                                    placeholder="Princípio ativo"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="concentracao" class="form-label">
+                                    Concentração
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="concentracao"
+                                    name="concentracao"
+                                    maxlength="100"
+                                    value="{{ dados.concentracao|default:'' }}"
+                                    placeholder="Ex.: 50 mg/mL"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="forma_farmaceutica" class="form-label">
+                                    Forma farmacêutica
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="forma_farmaceutica"
+                                    name="forma_farmaceutica"
+                                    maxlength="100"
+                                    value="{{ dados.forma_farmaceutica|default:'' }}"
+                                    placeholder="Ex.: comprimido, solução oral"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="unidade_medida" class="form-label">
+                                    Unidade de medida
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="unidade_medida"
+                                    name="unidade_medida"
+                                    maxlength="45"
+                                    value="{{ dados.unidade_medida|default:'' }}"
+                                    placeholder="Ex.: comprimido, mL, frasco"
+                                    required
+                                >
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controle de estoque -->
+                <div class="card mb-4">
+
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-package me-2"></i>
+                            Controle de estoque
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label for="estoque_atual" class="form-label">
+                                    Estoque atual
+                                </label>
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="estoque_atual"
+                                    name="estoque_atual"
+                                    min="0"
+                                    step="0.01"
+                                    value="{{ dados.estoque_atual|default:'0.00' }}"
+                                >
+
+                                <div class="form-hint">
+                                    Quantidade disponível inicialmente.
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="estoque_minimo" class="form-label">
+                                    Estoque mínimo
+                                </label>
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="estoque_minimo"
+                                    name="estoque_minimo"
+                                    min="0"
+                                    step="0.01"
+                                    value="{{ dados.estoque_minimo|default:'0.00' }}"
+                                >
+
+                                <div class="form-hint">
+                                    Quantidade mínima para gerar um alerta de estoque baixo.
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="card mb-4">
+
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-notes me-2"></i>
+                            Informações complementares
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div>
+                            <label for="observacoes" class="form-label">
+                                Observações
+                            </label>
+
+                            <textarea
+                                class="form-control"
+                                id="observacoes"
+                                name="observacoes"
+                                rows="4"
+                                placeholder="Informações adicionais sobre o medicamento."
+                            >{{ dados.observacoes|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="d-flex justify-content-end gap-2 mb-4">
+
+                    <a
+                        href="{% url 'medicamentos:lista' %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        <i class="ti ti-x me-1"></i>
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy me-1"></i>
+
+                        {% if medicamento %}
+                            Salvar alterações
+                        {% else %}
+                            Cadastrar medicamento
+                        {% endif %}
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -282,51 +282,6 @@
                         </div>
 
 
-                         {% if pessoa and request.user.pessoa_id != pessoa.id %}
-                            <!-- Status da pessoa -->
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h3 class="card-title">
-                                        <i class="ti ti-check me-2"></i>
-                                        Status
-                                    </h3>
-                                </div>
-
-                                <div class="card-body">
-                                    <div class="d-flex flex-wrap gap-4">
-
-                                        <label class="form-check form-check-inline">
-                                            <input
-                                                    class="form-check-input"
-                                                    type="radio"
-                                                    name="is_active"
-                                                    value="true"
-                                                    {% if dados.is_active or not pessoa %}checked{% endif %}
-                                            >
-                                            <span class="form-check-label">
-                                                Habilitado
-                                            </span>
-                                        </label>
-
-                                        <label class="form-check form-check-inline">
-                                            <input
-                                                    class="form-check-input"
-                                                    type="radio"
-                                                    name="is_active"
-                                                    value="false"
-                                                    {% if pessoa and not dados.is_active %}checked{% endif %}
-                                            >
-                                            <span class="form-check-label">
-                                                Desabilitado
-                                            </span>
-                                        </label>
-
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-
-
                         <!-- Endereço -->
                         <div class="card mb-4">
                             <div class="card-header">

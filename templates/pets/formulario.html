@@ -237,6 +237,20 @@
                             <div class="card-body">
                                 <div class="row g-3">
 
+                                    <div class="col-md-4">
+                                        <label for="microchip" class="form-label">
+                                            Microchip
+                                        </label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="microchip"
+                                            name="microchip"
+                                            maxlength="100"
+                                            value="{{ dados.microchip|default:'' }}"
+                                        >
+                                    </div>
+
                                     <div class="col-md-8">
                                         <label for="nome" class="form-label">
                                             Nome
@@ -249,20 +263,6 @@
                                             maxlength="45"
                                             value="{{ dados.nome|default:'' }}"
                                             required
-                                        >
-                                    </div>
-
-                                    <div class="col-md-4">
-                                        <label for="microchip" class="form-label">
-                                            Microchip
-                                        </label>
-                                        <input
-                                            type="text"
-                                            class="form-control"
-                                            id="microchip"
-                                            name="microchip"
-                                            maxlength="100"
-                                            value="{{ dados.microchip|default:'' }}"
                                         >
                                     </div>
 
@@ -461,48 +461,6 @@
                                     name="observacoes"
                                     rows="4"
                                 >{{ dados.observacoes|default:'' }}</textarea>
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="ti ti-check me-2"></i>
-                                    Status
-                                </h3>
-                            </div>
-
-                            <div class="card-body">
-                                <div class="d-flex flex-wrap gap-4">
-
-                                    <label class="form-check form-check-inline">
-                                        <input
-                                            class="form-check-input"
-                                            type="radio"
-                                            name="is_active"
-                                            value="true"
-                                            {% if dados.is_active != False %}checked{% endif %}
-                                        >
-                                        <span class="form-check-label">
-                                            Habilitado
-                                        </span>
-                                    </label>
-
-                                    <label class="form-check form-check-inline">
-                                        <input
-                                            class="form-check-input"
-                                            type="radio"
-                                            name="is_active"
-                                            value="false"
-                                            {% if dados.is_active == False %}checked{% endif %}
-                                        >
-                                        <span class="form-check-label">
-                                            Desabilitado
-                                        </span>
-                                    </label>
-
-                                </div>
                             </div>
                         </div>
 
@@ -899,8 +857,20 @@
                                             </tr>
                                         {% empty %}
                                             <tr>
-                                                <td colspan="5" class="text-center text-secondary py-4">
-                                                    Nenhum resgate registrado para este Pet.
+                                                <td colspan="5" class="text-center py-5">
+                                                    <div class="empty">
+                                                        <div class="empty-icon">
+                                                            <i class="ti ti-clipboard-list"></i>
+                                                        </div>
+
+                                                        <p class="empty-title">
+                                                            Nenhum resgate registrado
+                                                        </p>
+
+                                                        <p class="empty-subtitle text-secondary">
+                                                            O Pet não passou por nenhuma situação que exigiu resgate.
+                                                        </p>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         {% endfor %}
@@ -1011,6 +981,5 @@
         });
     });
 </script>
-
 
 {% endblock %}

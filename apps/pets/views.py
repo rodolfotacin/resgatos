@@ -32,7 +32,9 @@ def lista(request):
         data_fim__isnull=True
     ).select_related('pessoa')
 
-    pets = Pet.objects.prefetch_related(
+    pets = Pet.objects.filter(
+        is_active=True
+    ).prefetch_related(
         Prefetch(
             'vinculos_pessoas',
             queryset=vinculos_ativos,
@@ -78,7 +80,6 @@ def adicionar(request):
         'porte': '',
         'pelagem': '',
         'observacoes': '',
-        'is_active': True,
     }
 
     if request.method == 'POST':
@@ -93,7 +94,6 @@ def adicionar(request):
             'porte': request.POST.get('porte', '').strip() or None,
             'pelagem': request.POST.get('pelagem', '').strip() or None,
             'observacoes': request.POST.get('observacoes', '').strip() or None,
-            'is_active': request.POST.get('is_active', 'true') == 'true',
         }
 
         obrigatorios = ['nome', 'especie']
@@ -140,7 +140,7 @@ def adicionar(request):
             pelagem=dados['pelagem'],
             foto=foto,
             observacoes=dados['observacoes'],
-            is_active=dados['is_active'],
+            is_active=True,
         )
 
         messages.success(
@@ -160,6 +160,10 @@ def adicionar(request):
 @login_required
 def editar(request, pet_id):
     pet = get_object_or_404(Pet, pk=pet_id)
+
+    if not pet.is_active:
+        pet.is_active = True
+        pet.save(update_fields=['is_active'])
 
     pessoas_relacionadas = PessoaPet.objects.filter(
         pet=pet
@@ -185,7 +189,6 @@ def editar(request, pet_id):
         'porte': pet.porte or '',
         'pelagem': pet.pelagem or '',
         'observacoes': pet.observacoes or '',
-        'is_active': pet.is_active,
     }
 
     resgates = Resgate.objects.filter(
@@ -219,7 +222,6 @@ def editar(request, pet_id):
             'observacoes': request.POST.get(
                 'observacoes', ''
             ).strip() or None,
-            'is_active': request.POST.get('is_active') == 'true',
         }
 
         if not dados['nome'] or not dados['especie']:
@@ -273,7 +275,6 @@ def editar(request, pet_id):
             pet.porte = dados['porte']
             pet.pelagem = dados['pelagem']
             pet.observacoes = dados['observacoes']
-            pet.is_active = dados['is_active']
 
             foto = request.FILES.get('foto')
             remover_foto = request.POST.get('remover_foto') == '1'
@@ -315,6 +316,29 @@ def editar(request, pet_id):
             'pessoas_relacionadas': pessoas_relacionadas,
         },
     )
+
+
+@login_required
+def inativar(request, pet_id):
+    if request.method != 'POST':
+        return redirect('pets:lista')
+
+    pet = get_object_or_404(
+        Pet,
+        pk=pet_id,
+        is_active=True,
+    )
+
+    with transaction.atomic():
+        pet.is_active = False
+        pet.save(update_fields=['is_active', 'updated_at'])
+
+    messages.success(
+        request,
+        'Pet excluído com sucesso.'
+    )
+
+    return redirect('pets:lista')
 
 
 @login_required

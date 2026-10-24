@@ -231,7 +231,7 @@
 
                                     <form
                                         method="post"
-                                        action="#"
+                                        action="{% url 'pets:inativar' pet.id %}"
                                         class="d-inline js-form-inativar"
                                         data-nome="{{ pet.nome }}"
                                     >

@@ -112,7 +112,6 @@ def adicionar(request):
         'bairro': request.POST.get('bairro', '').strip(),
         'cidade': request.POST.get('cidade', '').strip(),
         'estado': request.POST.get('estado', '').strip(),
-        'is_active': request.POST.get('is_active') == 'true',
         'is_attendance_responsible': (
             request.POST.get('is_attendance_responsible') == 'on'
         ),
@@ -181,6 +180,7 @@ def adicionar(request):
         with transaction.atomic():
             pessoa = Pessoa.objects.create(
                 **dados,
+                is_active=True,
                 foto=foto,
             )
 
@@ -218,6 +218,10 @@ def adicionar(request):
 def editar(request, pessoa_id):
     pessoa = get_object_or_404(Pessoa, pk=pessoa_id)
 
+    if not pessoa.is_active:
+        pessoa.is_active = True
+        pessoa.save(update_fields=['is_active'])
+
     pessoas_pets = PessoaPet.objects.filter(
         pessoa=pessoa
     ).annotate(
@@ -246,7 +250,6 @@ def editar(request, pessoa_id):
             'bairro': request.POST.get('bairro', '').strip(),
             'cidade': request.POST.get('cidade', '').strip(),
             'estado': request.POST.get('estado', '').strip(),
-            'is_active': request.POST.get('is_active') == 'true',
             'is_attendance_responsible': (
                 request.POST.get('is_attendance_responsible') == 'on'
             ),
@@ -299,7 +302,6 @@ def editar(request, pessoa_id):
                         'dados': dados,
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
-                        'usuario_is_active': usuario_is_active,
                         'pessoas_pets': pessoas_pets,
                     }
                 )
@@ -317,7 +319,6 @@ def editar(request, pessoa_id):
                         'dados': dados,
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
-                        'usuario_is_active': usuario_is_active,
                         'pessoas_pets': pessoas_pets,
                     }
                 )
@@ -335,7 +336,6 @@ def editar(request, pessoa_id):
                         'dados': dados,
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
-                        'usuario_is_active': usuario_is_active,
                         'pessoas_pets': pessoas_pets,
                     }
                 )
@@ -354,7 +354,6 @@ def editar(request, pessoa_id):
                         'dados': dados,
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
-                        'usuario_is_active': usuario_is_active,
                         'pessoas_pets': pessoas_pets,
                     }
                 )
@@ -372,7 +371,6 @@ def editar(request, pessoa_id):
                         'dados': dados,
                         'usuario': usuario,
                         'possui_acesso': possui_acesso,
-                        'usuario_is_active': usuario_is_active,
                         'pessoas_pets': pessoas_pets,
                     }
                 )
@@ -380,9 +378,6 @@ def editar(request, pessoa_id):
         try:
             with transaction.atomic():
                 for campo, valor in dados.items():
-                    if campo == 'is_active' and eh_proprio_perfil:
-                        continue
-
                     setattr(pessoa, campo, valor)
 
                 foto_anterior = None

@@ -1,11 +1,328 @@
-{% extends 'base/app.html' %}
 
-{% block title %}Início | Resgatos{% endblock %}
+{% extends 'base/app.html' %}
+{% load static %}
+
+{% block title %}Estoque | Resgatos{% endblock %}
 
 {% block content %}
-    <div class="page-header mb-3">
-        <h1 class="page-title">Início</h1>
-    </div>
 
-    <p>Listagem de estoque</p>
+<div class="resgatos-page resgatos-stock">
+
+    <header class="resgatos-page-header">
+
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-package"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">Estoque</h1>
+                <p class="resgatos-page-description">
+                    Entradas de estoque e lotes de medicamentos
+                </p>
+            </div>
+        </div>
+
+        <nav class="resgatos-breadcrumb"
+             aria-label="Navegação estrutural">
+
+            <a href="{% url 'inicio' %}">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+
+            <span aria-hidden="true">/</span>
+            <span>Estoque</span>
+        </nav>
+
+    </header>
+
+    <!-- Filtros -->
+    <section class="resgatos-filter card"
+             aria-label="Filtros de entradas">
+
+        <div class="card-body">
+
+            <form method="get"
+                  action="{% url 'estoque:lista' %}">
+
+                <div class="resgatos-search-row">
+
+                    <div class="resgatos-search-input">
+                        <label for="estoque-search"
+                               class="visually-hidden">
+                            Pesquisar entradas
+                        </label>
+
+                        <i class="ti ti-search me-1"
+                           aria-hidden="true"></i>
+
+                        <input
+                            type="search"
+                            id="estoque-search"
+                            name="busca"
+                            class="form-control"
+                            placeholder="Pesquisar por origem, nota fiscal ou observações..."
+                            value="{{ busca }}"
+                        >
+
+                        <input
+                            type="hidden"
+                            name="por_pagina"
+                            value="{{ por_pagina }}"
+                        >
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        <i class="ti ti-search me-1"></i>
+                        Buscar
+                    </button>
+
+                    <a href="{% url 'estoque:lista' %}"
+                       class="btn btn-outline-secondary">
+                        <i class="ti ti-refresh me-1"></i>
+                        Limpar filtros
+                    </a>
+
+                </div>
+
+            </form>
+
+            {% if busca %}
+                <div class="alert alert-primary mt-3"
+                     role="status">
+                    <i class="ti ti-filter me-2"></i>
+                    Resultados para <strong>{{ busca }}</strong>.
+                </div>
+            {% endif %}
+
+        </div>
+    </section>
+
+    <!-- Listagem -->
+    <section class="resgatos-list-card card">
+
+        <div class="resgatos-list-header">
+
+            <div class="data-list-heading">
+                <h2 class="data-list-title">
+                    Entradas registradas
+                </h2>
+
+                <p class="data-list-count">
+                    {% if paginator.count %}
+                        Exibindo {{ page_obj.start_index }}-{{ page_obj.end_index }}
+                        de {{ paginator.count }} entradas
+                    {% else %}
+                        Nenhuma entrada cadastrada
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="resgatos-page-actions">
+                <a href="{% url 'estoque:adicionar' %}"
+                   class="btn btn-primary">
+                    <i class="ti ti-plus me-1"></i>
+                    Nova entrada
+                </a>
+            </div>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-vcenter">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th class="text-center">Origem</th>
+                        <th>Doador / Fornecedor</th>
+                        <th>Nota fiscal</th>
+                        <th class="text-center">Lotes</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for entrada in entradas %}
+                        <tr>
+                            <td>
+                                {{ entrada.data|date:"d/m/Y" }}
+                            </td>
+
+                            <td class="text-center">
+                                {% if entrada.tipo_origem == 'DOACAO' %}
+                                    <span class="badge bg-green-lt">
+                                        Doação
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-azure-lt">
+                                        Compra
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if entrada.pessoa %}
+                                    {{ entrada.pessoa }}
+                                {% elif entrada.fornecedor %}
+                                    {{ entrada.fornecedor }}
+                                {% else %}
+                                    <span class="text-secondary">—</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ entrada.numero_nota_fiscal|default:"—" }}
+                            </td>
+
+                            <td class="text-center">
+                                {{ entrada.total_lotes }}
+                            </td>
+
+                            <td class="text-end">
+                                <a
+                                    href="{% url 'estoque:editar' entrada_id=entrada.id %}"
+                                    class="btn btn-outline-secondary btn-icon"
+                                    title="Editar entrada"
+                                    aria-label="Editar entrada"
+                                >
+                                    <i class="ti ti-pencil" aria-hidden="true"></i>
+                                </a>
+                                <form
+                                    method="post"
+                                    action="{% url 'estoque:excluir' entrada_id=entrada.id %}"
+                                    class="d-inline js-form-inativar"
+                                    data-nome="entrada de estoque de {{ entrada.get_tipo_origem_display|lower }} de {{ entrada.data|date:'d/m/Y' }}"
+                                >
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-icon btn-outline-secondary js-inativar"
+                                        title="Excluir entrada"
+                                        aria-label="Excluir entrada"
+                                        {% if entrada.total_lotes > 0 %}
+                                            disabled
+                                            data-bs-toggle="tooltip"
+                                            data-bs-title="Não é possível excluir uma entrada que possui lotes."
+                                        {% endif %}
+                                    >
+                                        <i class="ti ti-trash" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                    {% empty %}
+                        <tr>
+                            <td colspan="6"
+                                class="resgatos-empty-state">
+                                <i class="ti ti-package"
+                                   aria-hidden="true"></i>
+
+                                <p>Nenhuma entrada encontrada.</p>
+
+                                <span>
+                                    Cadastre uma entrada ou ajuste os filtros.
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+
+        <!-- Paginação -->
+        <footer class="resgatos-list-footer">
+
+            <div class="data-list-footer">
+
+                <div class="data-list-page-size">
+                    <form method="get"
+                          action="{% url 'estoque:lista' %}"
+                          class="d-inline-flex align-items-center gap-2">
+
+                        <input type="hidden"
+                               name="busca"
+                               value="{{ busca }}">
+
+                        <label for="por_pagina">Exibir</label>
+
+                        <select id="por_pagina"
+                                name="por_pagina"
+                                class="form-select"
+                                onchange="this.form.submit()">
+
+                            {% for quantidade in "10,20,50,100"|cut:" "|make_list %}
+                                {% comment %}
+                                As opções são definidas abaixo.
+                                {% endcomment %}
+                            {% endfor %}
+
+                            <option value="10"
+                                {% if por_pagina == 10 %}selected{% endif %}>
+                                10
+                            </option>
+
+                            <option value="20"
+                                {% if por_pagina == 20 %}selected{% endif %}>
+                                20
+                            </option>
+
+                            <option value="50"
+                                {% if por_pagina == 50 %}selected{% endif %}>
+                                50
+                            </option>
+
+                            <option value="100"
+                                {% if por_pagina == 100 %}selected{% endif %}>
+                                100
+                            </option>
+
+                        </select>
+
+                        <span>itens por página</span>
+                    </form>
+                </div>
+
+                <nav class="data-list-pagination"
+                     aria-label="Paginação de entradas">
+
+                    {% if page_obj.has_previous %}
+                        <a
+                            href="?page={{ page_obj.previous_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                            class="data-list-page"
+                            aria-label="Página anterior">
+                            <i class="ti ti-chevron-left"></i>
+                        </a>
+                    {% endif %}
+
+                    <span class="data-list-page data-list-page-active">
+                        {{ page_obj.number }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a
+                            href="?page={{ page_obj.next_page_number }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}"
+                            class="data-list-page"
+                            aria-label="Próxima página">
+                            <i class="ti ti-chevron-right"></i>
+                        </a>
+                    {% endif %}
+
+                </nav>
+
+            </div>
+
+        </footer>
+
+    </section>
+
+</div>
+
 {% endblock %}

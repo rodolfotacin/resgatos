@@ -77,10 +77,7 @@
         <div class="card-body">
             <div class="tab-content">
 
-                <!-- ================================================== -->
-                <!-- ABA CADASTRO                                       -->
-                <!-- ================================================== -->
-
+                <!-- CADASTRO -->
                 <div
                     class="tab-pane fade {% if request.GET.aba != 'lotes' or not entrada %}active show{% endif %}"
                     id="aba-cadastro"
@@ -361,9 +358,7 @@
                     </form>
                 </div>
 
-                <!-- ================================================== -->
-                <!-- ABA LOTES                                          -->
-                <!-- ================================================== -->
+                <!-- LOTES  -->
 
                 {% if entrada %}
                 <div
@@ -376,69 +371,105 @@
                         <div class="card-header">
                             <h3 class="card-title">
                                 <i class="ti ti-packages me-2"></i>
-                                Lotes da entrada
+                                Lotes
                             </h3>
+
+                            <div class="card-actions">
+                                <a
+                                    href="{% url 'estoque:adicionar_lote' entrada.id %}"
+                                    class="btn btn-primary"
+                                >
+                                    <i class="ti ti-plus me-1"></i>
+                                    Cadastrar lote
+                                </a>
+                            </div>
                         </div>
 
-                        <div class="card-body">
+                        {% if entrada.lotes.exists %}
+                        <div class="table-responsive">
+                            <table class="table table-vcenter card-table">
+                                <thead>
+                                    <tr>
+                                        <th>Medicamento</th>
+                                        <th>Número do lote</th>
+                                        <th>Validade</th>
+                                        <th class="text-center">Quantidade</th>
+                                        <th class="text-center">Valor unitário</th>
+                                        <th class="w-1">Ações</th>
+                                    </tr>
+                                </thead>
 
-                            <p class="text-secondary">
-                                Cadastre e consulte os lotes de medicamentos
-                                recebidos nesta entrada.
+                                <tbody>
+                                    {% for lote in entrada.lotes.all %}
+                                    <tr>
+                                        <td>{{ lote.medicamento.nome }}</td>
+
+                                        <td>{{ lote.numero_lote }}</td>
+
+                                        <td>{{ lote.data_validade|date:"d/m/Y" }}</td>
+
+                                        <td class="text-center">
+                                            {{ lote.quantidade_recebida|floatformat:2 }}
+                                        </td>
+
+                                        <td class="text-center">
+                                            R$ {{ lote.valor_unitario|floatformat:2 }}
+                                        </td>
+
+                                        <td>
+                                            <div class="resgatos-row-actions">
+                                                <a
+                                                    href="{% url 'estoque:editar_lote' entrada_id=entrada.id lote_id=lote.id %}"
+                                                    class="btn btn-outline-secondary btn-icon"
+                                                    title="Editar lote"
+                                                    aria-label="Editar lote"
+                                                >
+                                                    <i class="ti ti-pencil" aria-hidden="true"></i>
+                                                </a>
+                                                <form
+                                                    method="post"
+                                                    action="{% url 'estoque:excluir_lote' entrada.id lote.id %}"
+                                                    class="d-inline js-form-inativar"
+                                                    data-nome="lote {{ lote.numero_lote }}"
+                                                >
+                                                    {% csrf_token %}
+
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-icon btn-outline-secondary js-inativar"
+                                                        title="Excluir lote"
+                                                        aria-label="Excluir lote"
+                                                    >
+                                                        <i class="ti ti-trash" aria-hidden="true"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {% else %}
+
+                        <div class="empty">
+                            <div class="empty-icon">
+                                <i class="ti ti-package"></i>
+                            </div>
+
+                            <p class="empty-title">
+                                Nenhum lote cadastrado
                             </p>
 
-                            {% if entrada.lotes.exists %}
-
-                            <div class="table-responsive">
-                                <table class="table table-vcenter card-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Medicamento</th>
-                                            <th>Número do lote</th>
-                                            <th>Validade</th>
-                                            <th class="text-end">Quantidade</th>
-                                            <th class="text-end">Valor unitário</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {% for lote in entrada.lotes.all %}
-                                        <tr>
-                                            <td>{{ lote.medicamento.nome }}</td>
-                                            <td>{{ lote.numero_lote }}</td>
-                                            <td>{{ lote.data_validade|date:"d/m/Y" }}</td>
-                                            <td class="text-end">
-                                                {{ lote.quantidade_recebida|floatformat:2 }}
-                                            </td>
-                                            <td class="text-end">
-                                                R$ {{ lote.valor_unitario|floatformat:2 }}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {% else %}
-
-                            <div class="empty">
-                                <div class="empty-icon">
-                                    <i class="ti ti-package"></i>
-                                </div>
-
-                                <p class="empty-title">
-                                    Nenhum lote cadastrado
-                                </p>
-
-                                <p class="empty-subtitle text-secondary">
-                                    Os lotes poderão ser adicionados aqui
-                                    quando implementarmos o cadastro de lotes.
-                                </p>
-                            </div>
-
-                            {% endif %}
-
+                            <p class="empty-subtitle text-secondary">
+                                Os lotes poderão ser adicionados aqui
+                                quando implementarmos o cadastro de lotes.
+                            </p>
                         </div>
+                        {% endif %}
+
                     </div>
 
                 </div>

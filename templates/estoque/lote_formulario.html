@@ -1,0 +1,310 @@
+{% extends 'base/app.html' %}
+{% load static %}
+
+{% block title %}
+    {% if lote %}Editar lote{% else %}Cadastrar lote{% endif %} | Resgatos
+{% endblock %}
+
+{% block content %}
+
+<div class="resgatos-page resgatos-stock">
+
+    <!-- Cabeçalho -->
+    <header class="resgatos-page-header">
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-package"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">Estoque</h1>
+                <p class="resgatos-page-description">
+                    {% if lote %}
+                        Editar lote
+                    {% else %}
+                        Cadastrar lote
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
+            <a href="{% url 'inicio' %}">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <a href="{% url 'estoque:lista' %}">
+                <i class="ti ti-package" aria-hidden="true"></i>
+                Estoque
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <a href="{% url 'estoque:editar' entrada.id %}">
+                Entrada #{{ entrada.id }}
+            </a>
+
+            <span aria-hidden="true">/</span>
+
+            <span>
+                {% if lote %}Editar lote{% else %}Novo lote{% endif %}
+            </span>
+        </nav>
+    </header>
+
+    <!-- Formulário -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+
+                <li class="nav-item">
+                    <a
+                        href="{% url 'estoque:editar' entrada_id=entrada.id %}"
+                        class="nav-link"
+                    >
+                        <i class="ti ti-edit me-1"></i>
+                        Cadastro
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        href="{% url 'estoque:editar' entrada_id=entrada.id %}?aba=lotes"
+                        class="nav-link active"
+                        aria-current="page"
+                    >
+                        <i class="ti ti-packages me-1"></i>
+                        Lotes - {{ entrada.lotes.count }}
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Identificação -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-id me-2"></i>
+                            Identificação
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-8">
+                                <label for="medicamento_id" class="form-label">
+                                    Medicamento
+                                </label>
+
+                                <select
+                                    class="form-select"
+                                    id="medicamento_id"
+                                    name="medicamento_id"
+                                    required
+                                >
+                                    <option value="">Selecione um medicamento</option>
+
+                                    {% for medicamento in medicamentos %}
+                                        <option
+                                            value="{{ medicamento.id }}"
+                                            {% if dados.medicamento_id|stringformat:"s" == medicamento.id|stringformat:"s" %}selected{% endif %}
+                                        >
+                                            {{ medicamento.nome }}
+                                            {% if medicamento.concentracao %}
+                                                — {{ medicamento.concentracao }}
+                                            {% endif %}
+                                            {% if not medicamento.is_active %}
+                                                — Inativo
+                                            {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+
+                                <div class="form-hint">
+                                    Selecione o medicamento correspondente a este lote.
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="numero_lote" class="form-label">
+                                    Número do lote
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="numero_lote"
+                                    name="numero_lote"
+                                    maxlength="100"
+                                    value="{{ dados.numero_lote|default:'' }}"
+                                    placeholder="Ex.: ABC123"
+                                    required
+                                >
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="data_validade" class="form-label">
+                                    Data de validade
+                                </label>
+
+                                <input
+                                    type="date"
+                                    class="form-control"
+                                    id="data_validade"
+                                    name="data_validade"
+                                    value="{{ dados.data_validade|default:'' }}"
+                                    required
+                                >
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantidades e valores -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-scale me-2"></i>
+                            Quantidades e valores
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label
+                                    for="quantidade_recebida"
+                                    class="form-label"
+                                >
+                                    Quantidade recebida
+                                </label>
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="quantidade_recebida"
+                                    name="quantidade_recebida"
+                                    min="0.01"
+                                    step="0.01"
+                                    value="{{ dados.quantidade_recebida|default:'' }}"
+                                    required
+                                >
+
+                                <div class="form-hint">
+                                    Quantidade total recebida neste lote.
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label
+                                    for="quantidade_descartada"
+                                    class="form-label"
+                                >
+                                    Quantidade descartada
+                                </label>
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="quantidade_descartada"
+                                    name="quantidade_descartada"
+                                    min="0"
+                                    step="0.01"
+                                    value="{{ dados.quantidade_descartada|default:'0.00' }}"
+                                >
+
+                                <div class="form-hint">
+                                    Quantidade perdida ou descartada, se houver.
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="valor_unitario" class="form-label">
+                                    Valor unitário (R$)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="valor_unitario"
+                                    name="valor_unitario"
+                                    min="0"
+                                    step="0.01"
+                                    value="{{ dados.valor_unitario|default:'0.00' }}"
+                                >
+
+                                <div class="form-hint">
+                                    Informe zero quando não houver valor conhecido.
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observações -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-notes me-2"></i>
+                            Observações
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div>
+                            <label for="observacoes" class="form-label">
+                                Observações complementares
+                            </label>
+
+                            <textarea
+                                class="form-control"
+                                id="observacoes"
+                                name="observacoes"
+                                rows="4"
+                                placeholder="Informações adicionais sobre o lote."
+                            >{{ dados.observacoes|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="d-flex justify-content-end gap-2 mb-4">
+
+                    <a
+                        href="{% url 'estoque:editar' entrada_id=entrada.id %}?aba=lotes"
+                        class="btn btn-outline-secondary"
+                    >
+                        Cancelar
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy me-1"></i>
+
+                        {% if lote %}
+                            Salvar alterações
+                        {% else %}
+                            Cadastrar lote
+                        {% endif %}
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,340 @@
+
+{% load static %}
+
+<div class="resgatos-page resgatos-atendimentos">
+
+    <header class="resgatos-page-header">
+
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-vaccine"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">
+                    {% if modo_edicao %}Editar medicamento ministrado{% else %}Adicionar medicamento{% endif %}
+                </h1>
+                <p class="resgatos-page-description">
+                    Registre o medicamento ministrado neste atendimento.
+                </p>
+            </div>
+        </div>
+
+    </header>
+
+    <form id="formulario-medicamento"
+          method="post"
+          action="{% if modo_edicao %}{% url 'atendimentos:editar_medicamento' utilizacao.pk %}{% else %}{% url 'atendimentos:registrar_medicamento' atendimento.pk %}{% endif %}">
+
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="medicamento_id" class="form-label required">
+                Medicamento
+            </label>
+
+            <select name="medicamento_id"
+                    id="medicamento_id"
+                    class="form-select"
+                    required>
+                <option value="">Selecione um medicamento</option>
+
+                {% for medicamento in medicamentos %}
+                    <option value="{{ medicamento.pk }}"
+                            {% if utilizacao and utilizacao.lote.medicamento_id == medicamento.pk %}selected{% endif %}>
+                        {{ medicamento.nome }}
+                        {% if medicamento.concentracao %}
+                            — {{ medicamento.concentracao }}
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="lote_id" class="form-label required">
+                Lote
+            </label>
+
+            <select name="lote_id"
+                    id="lote_id"
+                    class="form-select"
+                    data-lote-selecionado="{% if utilizacao %}{{ utilizacao.lote_id }}{% endif %}"
+                    data-utilizacao-id="{% if utilizacao %}{{ utilizacao.pk }}{% endif %}"
+                    required
+                    disabled>
+                <option value="">Carregando lotes...</option>
+            </select>
+
+            <small id="saldo-lote" class="form-hint">
+                Selecione um medicamento para consultar os lotes disponíveis.
+            </small>
+        </div>
+
+        <div class="mb-3">
+            <label for="quantidade" class="form-label required">
+                Quantidade ministrada
+            </label>
+
+            <input type="number"
+                   name="quantidade"
+                   id="quantidade"
+                   class="form-control"
+                   min="0.01"
+                   step="0.01"
+                   value="{% if utilizacao %}{{ utilizacao.quantidade }}{% endif %}"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label for="via_administracao" class="form-label required">
+                Via de administração
+            </label>
+
+            <input type="text"
+                   name="via_administracao"
+                   id="via_administracao"
+                   class="form-control"
+                   maxlength="45"
+                   value="{{ utilizacao.via_administracao|default:'' }}"
+                   placeholder="Ex.: oral, intramuscular, tópica"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label for="observacoes_medicamento" class="form-label">
+                Observações
+            </label>
+
+            <textarea name="observacoes"
+                      id="observacoes_medicamento"
+                      class="form-control"
+                      rows="3">{{ utilizacao.observacoes|default:'' }}</textarea>
+        </div>
+
+        <div id="erro-medicamento"
+             class="alert alert-danger d-none"
+             role="alert"></div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    onclick="Fancybox.close()">
+                Cancelar
+            </button>
+
+            <button type="submit"
+                    id="btn-salvar-medicamento"
+                    class="btn btn-primary">
+                <i class="ti ti-device-floppy me-1"></i>
+                {% if modo_edicao %}Salvar alterações{% else %}Registrar medicamento{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+
+
+<script>
+async function abrirFormularioMedicamento() {
+    const url = "{% url 'atendimentos:registrar_medicamento' atendimento.pk %}";
+
+    try {
+        const resposta = await fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!resposta.ok) {
+            throw new Error('Não foi possível carregar o formulário.');
+        }
+
+        const html = await resposta.text();
+
+        document.getElementById('formulario-medicamento-fancybox')?.remove();
+
+        const container = document.createElement('div');
+        container.id = 'formulario-medicamento-fancybox';
+        container.style.width = 'min(700px, 95vw)';
+        container.innerHTML = html;
+
+        document.body.appendChild(container);
+
+        inicializarFormularioMedicamento(container);
+
+        Fancybox.show([
+            {
+                src: '#formulario-medicamento-fancybox',
+                type: 'inline'
+            }
+        ]);
+
+    } catch (erro) {
+        console.error('Erro ao abrir formulário:', erro);
+        alert('Não foi possível abrir o formulário de medicamento.');
+    }
+}
+
+function inicializarFormularioMedicamento(container) {
+    const campoMedicamento = container.querySelector('#medicamento_id');
+    const campoLote = container.querySelector('#lote_id');
+    const campoSaldo = container.querySelector('#saldo-lote');
+    const formulario = container.querySelector('#formulario-medicamento');
+
+    if (!campoMedicamento || !campoLote || !campoSaldo || !formulario) {
+        console.error('Campos do formulário de medicamento não encontrados.');
+        return;
+    }
+
+    async function carregarLotes(medicamentoId, loteSelecionadoId = '') {
+        campoLote.replaceChildren();
+        campoLote.disabled = true;
+
+        if (!medicamentoId) {
+            campoLote.add(new Option('Selecione primeiro o medicamento', ''));
+
+            campoSaldo.textContent =
+                'Selecione um medicamento para consultar os lotes disponíveis.';
+
+            return;
+        }
+
+        campoLote.add(new Option('Carregando lotes...', ''));
+        campoSaldo.textContent = 'Consultando estoque...';
+
+        try {
+            const parametros = new URLSearchParams({
+                medicamento_id: medicamentoId
+            });
+
+            const utilizacaoId = campoLote.dataset.utilizacaoId;
+
+            if (utilizacaoId) {
+                parametros.set('utilizacao_id', utilizacaoId);
+            }
+
+            const url =
+                "{% url 'atendimentos:lotes_disponiveis' %}" +
+                "?" + parametros.toString();
+
+            const resposta = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                throw new Error(
+                    dados.erro || 'Não foi possível consultar os lotes.'
+                );
+            }
+
+            campoLote.replaceChildren();
+
+            if (!dados.lotes || dados.lotes.length === 0) {
+                campoLote.add(new Option('Nenhum lote disponível', ''));
+
+                campoSaldo.textContent =
+                    'Não existem lotes válidos com saldo disponível para este medicamento.';
+
+                return;
+            }
+
+            campoLote.add(new Option('Selecione um lote', ''));
+
+            dados.lotes.forEach(function (lote) {
+                campoLote.add(new Option(
+                    `${lote.numero_lote} — Validade: ${lote.data_validade} — Saldo: ${lote.saldo}`,
+                    String(lote.id)
+                ));
+            });
+
+            // Seleciona o lote existente durante a edição.
+            if (loteSelecionadoId) {
+                campoLote.value = String(loteSelecionadoId);
+            }
+
+            campoLote.disabled = false;
+
+            campoSaldo.textContent =
+                campoLote.value
+                    ? 'Lote selecionado para este atendimento.'
+                    : 'Selecione o lote que será utilizado neste atendimento.';
+
+        } catch (erro) {
+            console.error('Erro ao carregar lotes:', erro);
+
+            campoLote.replaceChildren();
+            campoLote.add(new Option('Erro ao carregar lotes', ''));
+
+            campoSaldo.textContent =
+                'Não foi possível consultar os lotes. Tente novamente.';
+        }
+    }
+
+    // Carrega os lotes quando o usuário altera o medicamento.
+    campoMedicamento.addEventListener('change', function () {
+        carregarLotes(campoMedicamento.value);
+    });
+
+    // Na edição, carrega os lotes e seleciona o lote já utilizado.
+    const loteSelecionadoId = campoLote.dataset.loteSelecionado || '';
+
+    if (campoMedicamento.value) {
+        carregarLotes(
+            campoMedicamento.value,
+            loteSelecionadoId
+        );
+    }
+
+    // Mantém o envio assíncrono do formulário.
+    formulario.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const botaoSalvar = formulario.querySelector('#btn-salvar-medicamento');
+        const campoErro = formulario.querySelector('#erro-medicamento');
+
+        if (!botaoSalvar || !campoErro || botaoSalvar.disabled) {
+            return;
+        }
+
+        botaoSalvar.disabled = true;
+        campoErro.textContent = '';
+        campoErro.classList.add('d-none');
+
+        try {
+            const resposta = await fetch(formulario.action, {
+                method: 'POST',
+                body: new FormData(formulario),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok || !dados.sucesso) {
+                throw new Error(
+                    dados.erro ||
+                    dados.mensagem ||
+                    'Não foi possível salvar o medicamento.'
+                );
+            }
+
+            Fancybox.close();
+
+            await atualizarMedicamentosMinistrados();
+
+        } catch (erro) {
+            console.error('Erro ao salvar medicamento:', erro);
+            campoErro.textContent = erro.message;
+            campoErro.classList.remove('d-none');
+
+        } finally {
+            botaoSalvar.disabled = false;
+        }
+    });
+}
+</script>

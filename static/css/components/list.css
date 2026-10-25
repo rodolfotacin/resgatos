@@ -7,7 +7,8 @@
 .resgatos-resgates,
 .resgatos-suppliers,
 .resgatos-medications,
-.resgatos-stock {
+.resgatos-stock,
+.resgatos-atendimentos {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -194,7 +195,8 @@
 .resgatos-resgates-table.
 .resgatos-suppliers-table,
 .resgatos-medications-table,
-.resgatos-stoke-table {
+.resgatos-stock-table,
+.resgatos-atendimentos-table {
     margin-bottom: 0;
 }
 
@@ -203,7 +205,8 @@
 .resgatos-resgates-table thead th,
 .resgatos-suppliers-table thead th,
 .resgatos-medications-table thead th,
-.resgatos-stoke-table thead th {
+.resgatos-stock-table thead th,
+.resgatos-atendimentos-table thead th {
     padding: 0.75rem 0.875rem;
     background: var(--tblr-bg-surface-secondary, #f1f4f9);
     color: var(--resgatos-text, #182433);
@@ -218,7 +221,8 @@
 .resgatos-resgates-table tbody td,
 .resgatos-suppliers-table tbody td,
 .resgatos-medications-table tbody td,
-.resgatos-stoke-table tbody td{
+.resgatos-stock-table tbody td
+.resgatos-atendimentos-table tbody td {
     padding: 0.75rem 0.875rem;
     border-bottom-color: var(--resgatos-border, #e5e9ef);
     color: var(--resgatos-text, #182433);
@@ -231,7 +235,8 @@
 .resgatos-resgates-table tbody tr:last-child td,
 .resgatos-suppliers-table tbody tr:last-child td
 .resgatos-medications-table tbody tr:last-child td,
-.resgatos-stoke-table tbody tr:last-child td {
+.resgatos-stock-table tbody tr:last-child td
+.resgatos-atendimentos-table tbody tr:last-child td {
     border-bottom: 0;
 }
 

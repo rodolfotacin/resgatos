@@ -36,7 +36,11 @@
             <a href="{% url 'estoque:lista' %}">Estoque</a>
             <span>/</span>
             <span>
-                {% if entrada %}Editar entrada{% else %}Nova entrada{% endif %}
+                {% if entrada %}
+                    Editar entrada
+                {% else %}
+                    Cadastrar entrada
+                {% endif %}
             </span>
         </div>
     </div>

@@ -4,7 +4,24 @@ from django.db import models
 
 class Atendimento(models.Model):
     data_hora = models.DateTimeField()
-    tipo = models.CharField(max_length=50)
+
+    class Tipo(models.TextChoices):
+        AVALIACAO = 'AVALIACAO', 'Avaliação'
+        CONSULTA = 'CONSULTA', 'Consulta'
+        RETORNO = 'RETORNO', 'Retorno'
+        TRATAMENTO = 'TRATAMENTO', 'Tratamento'
+        VACINACAO = 'VACINACAO', 'Vacinação'
+        PROCEDIMENTO = 'PROCEDIMENTO', 'Procedimento'
+        EMERGENCIA = 'EMERGENCIA', 'Emergência'
+        OUTRO = 'OUTRO', 'Outro'
+
+    # Demais campos do modelo...
+
+    tipo = models.CharField(
+        max_length=20,
+        choices=Tipo.choices,
+    )
+
     motivo = models.TextField(blank=True, null=True)
     peso = models.DecimalField(
         max_digits=10,

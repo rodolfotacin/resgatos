@@ -1,0 +1,62 @@
+{% if medicamentos_ministrados %}
+    <div class="table-responsive mb-4">
+        <table class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th>Medicamento</th>
+                    <th>Lote</th>
+                    <th>Quantidade</th>
+                    <th>Via de administração</th>
+                    <th>Observações</th>
+                    <th scope="col" class="text-center"></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in medicamentos_ministrados %}
+                    <tr>
+                        <td>{{ item.lote.medicamento.nome }}</td>
+                        <td>{{ item.lote.numero_lote }}</td>
+                        <td>{{ item.quantidade }}</td>
+                        <td>{{ item.via_administracao|default:"—" }}</td>
+                        <td>{{ item.observacoes|default:"—" }}</td>
+
+                        <!-- Ações -->
+                        <td>
+                            <div class="resgatos-row-actions">
+
+                                <a
+                                    href="{% url 'atendimentos:editar_medicamento' item.pk %}"
+                                    class="btn btn-outline-secondary btn-icon js-editar-medicamento"
+                                    title="Editar medicamento ministrado"
+                                    aria-label="Editar medicamento ministrado"
+                                >
+                                    <i class="ti ti-pencil" aria-hidden="true"></i>
+                                </a>
+
+                                <button
+                                    type="button"
+                                    class="btn btn-icon btn-outline-secondary js-excluir-medicamento"
+                                    data-url="{% url 'atendimentos:excluir_medicamento' item.pk %}"
+                                    data-nome="{{ item.lote.medicamento.nome }}"
+                                    title="Excluir medicamento ministrado"
+                                    aria-label="Excluir medicamento ministrado"
+                                >
+                                    <i class="ti ti-trash" aria-hidden="true"></i>
+                                </button>
+
+                                </form>
+
+                            </div>
+                        </td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="text-secondary mb-4">
+        Nenhum medicamento foi registrado neste atendimento.
+    </p>
+{% endif %}

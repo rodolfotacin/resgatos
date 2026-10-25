@@ -1,0 +1,754 @@
+
+{% extends 'base/app.html' %}
+
+{% block content %}
+<div class="resgatos-page resgatos-atendimentos">
+
+    <div class="resgatos-page-header">
+        <div class="resgatos-page-heading">
+            <div class="resgatos-page-icon" aria-hidden="true">
+                <i class="ti ti-stethoscope"></i>
+            </div>
+
+            <div>
+                <h1 class="resgatos-page-title">Atendimentos</h1>
+                <p class="resgatos-page-description">
+                    {% if atendimento %}
+                        Editar atendimento
+                    {% else %}
+                        Cadastrar atendimento
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <nav class="resgatos-breadcrumb" aria-label="Navegação estrutural">
+            <a href="{% url 'inicio' %}">
+                <i class="ti ti-home" aria-hidden="true"></i>
+                Início
+            </a>
+            <span aria-hidden="true">/</span>
+            <a href="{% url 'atendimentos:lista' %}">
+                <i class="ti ti-stethoscope" aria-hidden="true"></i>
+                Atendimentos
+            </a>
+            <span aria-hidden="true">/</span>
+            <span>
+                {% if atendimento %}
+                    Editar atendimento
+                {% else %}
+                    Cadastrar atendimento
+                {% endif %}
+            </span>
+        </nav>
+    </div>
+
+    <form method="post" id="form-atendimento">
+        {% csrf_token %}
+
+        <!-- Dados do atendimento -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-clipboard-list me-2"></i>
+                    Dados do atendimento
+                </h3>
+            </div>
+
+            <div class="card-body">
+
+                <!-- Identificação -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-id me-2"></i>
+                            Identificação
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label for="pet_id" class="form-label">
+                                    Pet <span class="text-danger">*</span>
+                                </label>
+                                <select name="pet_id" id="pet_id"
+                                        class="form-select" required>
+                                    <option value="">Selecione o pet...</option>
+                                    {% for pet in pets %}
+                                    <option value="{{ pet.pk }}"
+                                        {% if dados.pet_id == pet.pk|stringformat:"s" %}selected{% endif %}>
+                                        {{ pet.nome }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="responsavel_id" class="form-label">
+                                    Responsável pelo atendimento
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select name="responsavel_id" id="responsavel_id"
+                                        class="form-select" required>
+                                    <option value="">Selecione o responsável...</option>
+                                    {% for pessoa in responsaveis %}
+                                    <option value="{{ pessoa.pk }}"
+                                        {% if dados.responsavel_id == pessoa.pk|stringformat:"s" %}selected{% endif %}>
+                                        {{ pessoa.nome }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="form-hint">
+                                    São exibidas somente pessoas habilitadas
+                                    para realizar atendimentos.
+                                </small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="data_hora" class="form-label">
+                                    Data e hora
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="datetime-local"
+                                       name="data_hora"
+                                       id="data_hora"
+                                       class="form-control"
+                                       value="{{ dados.data_hora }}"
+                                       required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="tipo" class="form-label">
+                                    Tipo de atendimento
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select name="tipo" id="tipo"
+                                        class="form-select" required>
+                                    <option value="">Selecione o tipo...</option>
+                                    {% for valor, descricao in tipos_atendimento %}
+                                    <option value="{{ valor }}"
+                                        {% if dados.tipo == valor %}selected{% endif %}>
+                                        {{ descricao }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avaliação clínica -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-stethoscope me-2"></i>
+                            Avaliação clínica
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label for="peso" class="form-label">
+                                    Peso (kg)
+                                </label>
+                                <input type="text"
+                                       inputmode="decimal"
+                                       name="peso"
+                                       id="peso"
+                                       class="form-control"
+                                       value="{{ dados.peso }}"
+                                       placeholder="Ex.: 4,5">
+                            </div>
+
+                            <div class="col-12">
+                                <label for="motivo" class="form-label">
+                                    Motivo do atendimento
+                                </label>
+                                <textarea name="motivo"
+                                          id="motivo"
+                                          class="form-control"
+                                          rows="3">{{ dados.motivo }}</textarea>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="avaliacao" class="form-label">
+                                    Avaliação
+                                </label>
+                                <textarea name="avaliacao"
+                                          id="avaliacao"
+                                          class="form-control"
+                                          rows="4">{{ dados.avaliacao }}</textarea>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações complementares -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="ti ti-file-text me-2"></i>
+                            Informações complementares
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <label for="observacoes" class="form-label">
+                            Observações
+                        </label>
+                        <textarea name="observacoes"
+                                  id="observacoes"
+                                  class="form-control"
+                                  rows="4">{{ dados.observacoes }}</textarea>
+                    </div>
+                </div>
+
+                {% if atendimento %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="ti ti-pill me-2"></i>
+                                Medicamentos ministrados
+                            </h3>
+                        </div>
+
+                        <div class="card-body">
+                            <div id="container-medicamentos-ministrados">
+                                {% include 'atendimentos/partials/medicamentos_ministrados.html' %}
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-primary mb-4"
+                                    onclick="abrirFormularioMedicamento()">
+                                <i class="ti ti-plus me-1"></i>
+                                Adicionar medicamento
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Ações -->
+                <div class="d-flex justify-content-end gap-2 mb-4">
+                    <a
+                        href="{% url 'atendimentos:lista' %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        <i class="ti ti-x me-1"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ti ti-device-floppy me-1"></i>
+                        {% if atendimento %}
+                            Salvar alterações
+                        {% else %}
+                            Cadastrar atendimento
+                        {% endif %}
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </form>
+</div>
+
+
+<script>
+async function abrirFormularioMedicamento() {
+    const urlFormulario =
+        {% if atendimento.pk %}
+            "{% url 'atendimentos:registrar_medicamento' atendimento.pk %}";
+        {% endif %}
+
+    try {
+        const resposta = await fetch(urlFormulario, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!resposta.ok) {
+            throw new Error(
+                `Erro ao carregar formulário: HTTP ${resposta.status}`
+            );
+        }
+
+        const html = await resposta.text();
+
+        // Remove o formulário anterior, caso exista.
+        document
+            .getElementById('formulario-medicamento-fancybox')
+            ?.remove();
+
+        // Cria o container do Fancybox.
+        const container = document.createElement('div');
+
+        container.id = 'formulario-medicamento-fancybox';
+        container.style.width = 'min(700px, 95vw)';
+        container.innerHTML = html;
+
+        document.body.appendChild(container);
+
+        // Inicializa os eventos do formulário.
+        inicializarFormularioMedicamento(container);
+
+        // Abre o Fancybox.
+        Fancybox.show([
+            {
+                src: '#formulario-medicamento-fancybox',
+                type: 'inline'
+            }
+        ]);
+
+    } catch (erro) {
+        console.error(
+            'Erro ao abrir formulário de medicamento:',
+            erro
+        );
+
+        alert('Não foi possível abrir o formulário de medicamento.');
+    }
+}
+
+
+
+async function abrirEdicaoMedicamento(urlFormulario) {
+    try {
+        const resposta = await fetch(urlFormulario, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        if (!resposta.ok) {
+            let mensagem = 'Não foi possível abrir a edição do medicamento.';
+
+            try {
+                const dados = await resposta.json();
+                mensagem = dados.erro || mensagem;
+            } catch (_) {
+                // Mantém a mensagem padrão se a resposta não for JSON.
+            }
+
+            throw new Error(mensagem);
+        }
+
+        const html = await resposta.text();
+
+        document
+            .getElementById('formulario-medicamento-fancybox')
+            ?.remove();
+
+        const container = document.createElement('div');
+        container.id = 'formulario-medicamento-fancybox';
+        container.style.width = 'min(700px, 95vw)';
+        container.innerHTML = html;
+
+        document.body.appendChild(container);
+
+        inicializarFormularioMedicamento(container);
+
+        Fancybox.show([
+            {
+                src: '#formulario-medicamento-fancybox',
+                type: 'inline'
+            }
+        ]);
+
+    } catch (erro) {
+        console.error('Erro ao abrir edição do medicamento:', erro);
+        alert(erro.message);
+    }
+}
+
+
+
+function inicializarFormularioMedicamento(container) {
+
+    const campoMedicamento =
+        container.querySelector('#medicamento_id');
+
+    const campoLote =
+        container.querySelector('#lote_id');
+
+    const campoSaldo =
+        container.querySelector('#saldo-lote');
+
+    const formulario =
+        container.querySelector('#formulario-medicamento');
+
+    if (
+        !campoMedicamento ||
+        !campoLote ||
+        !campoSaldo ||
+        !formulario
+    ) {
+        console.error(
+            'Não foram encontrados todos os elementos do formulário.'
+        );
+
+        return;
+    }
+
+
+    // =========================================================
+    // CARREGAMENTO DOS LOTES DISPONÍVEIS
+    // =========================================================
+
+    async function carregarLotes(
+        medicamentoId,
+        loteSelecionadoId = '',
+        utilizacaoId = ''
+    ) {
+        campoLote.replaceChildren();
+        campoLote.disabled = true;
+
+        if (!medicamentoId) {
+            campoLote.add(
+                new Option('Selecione primeiro o medicamento', '')
+            );
+
+            campoSaldo.textContent =
+                'Selecione um medicamento para consultar os lotes disponíveis.';
+
+            return;
+        }
+
+        campoLote.add(new Option('Carregando lotes...', ''));
+        campoSaldo.textContent = 'Consultando estoque...';
+
+        try {
+            const parametros = new URLSearchParams({
+                medicamento_id: medicamentoId
+            });
+
+            if (utilizacaoId) {
+                parametros.set('utilizacao_id', utilizacaoId);
+            }
+
+            const urlLotes =
+                "{% url 'atendimentos:lotes_disponiveis' %}" +
+                '?' + parametros.toString();
+
+            const resposta = await fetch(urlLotes, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                throw new Error(
+                    dados.erro || 'Não foi possível consultar os lotes.'
+                );
+            }
+
+            campoLote.replaceChildren();
+
+            if (!dados.lotes || dados.lotes.length === 0) {
+                campoLote.add(
+                    new Option('Nenhum lote disponível', '')
+                );
+
+                campoSaldo.textContent =
+                    'Não existem lotes válidos com saldo disponível.';
+
+                return;
+            }
+
+            campoLote.add(new Option('Selecione um lote', ''));
+
+            dados.lotes.forEach(function (lote) {
+                const texto =
+                    `${lote.numero_lote} — ` +
+                    `Validade: ${lote.data_validade} — ` +
+                    `Saldo: ${lote.saldo}`;
+
+                campoLote.add(
+                    new Option(texto, String(lote.id))
+                );
+            });
+
+            if (loteSelecionadoId) {
+                campoLote.value = String(loteSelecionadoId);
+            }
+
+            campoLote.disabled = false;
+
+            if (loteSelecionadoId && !campoLote.value) {
+                campoSaldo.textContent =
+                    'O lote atual não foi encontrado entre os lotes retornados pelo servidor.';
+            } else {
+                campoSaldo.textContent = campoLote.value
+                    ? 'Lote atual selecionado.'
+                    : 'Selecione o lote que será utilizado neste atendimento.';
+            }
+
+        } catch (erro) {
+            console.error('Erro ao consultar lotes:', erro);
+
+            campoLote.replaceChildren();
+            campoLote.add(
+                new Option('Erro ao carregar lotes', '')
+            );
+
+            campoSaldo.textContent =
+                'Não foi possível consultar os lotes. Tente novamente.';
+        }
+    }
+
+    // Ao trocar o medicamento, carrega os lotes sem preservar
+    // o lote anteriormente selecionado.
+    campoMedicamento.addEventListener('change', function () {
+        carregarLotes(campoMedicamento.value);
+    });
+
+    // Na edição, recupera o lote e a utilização atuais do HTML.
+    const loteSelecionadoId =
+        campoLote.dataset.loteSelecionado || '';
+
+    const utilizacaoId =
+        campoLote.dataset.utilizacaoId || '';
+
+    // IMPORTANTE: executar também na abertura do formulário.
+    if (campoMedicamento.value) {
+        carregarLotes(
+            campoMedicamento.value,
+            loteSelecionadoId,
+            utilizacaoId
+        );
+    }
+
+
+    // =========================================================
+    // ENVIO DO FORMULÁRIO SEM RECARREGAR A PÁGINA
+    // =========================================================
+
+    formulario.addEventListener('submit', async function (event) {
+
+        // Impede o envio tradicional que exibe o JSON no navegador.
+        event.preventDefault();
+
+        const botaoSalvar =
+            formulario.querySelector('#btn-salvar-medicamento');
+
+        const campoErro =
+            formulario.querySelector('#erro-medicamento');
+
+        if (!botaoSalvar || !campoErro) {
+            console.error(
+                'Não foram encontrados o botão de salvar ou o campo de erro.'
+            );
+
+            return;
+        }
+
+        // Evita envios repetidos.
+        if (botaoSalvar.disabled) {
+            return;
+        }
+
+        botaoSalvar.disabled = true;
+        campoErro.textContent = '';
+        campoErro.classList.add('d-none');
+
+        try {
+
+            const resposta = await fetch(formulario.action, {
+                method: 'POST',
+                body: new FormData(formulario),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok || !dados.sucesso) {
+                throw new Error(
+                    dados.erro ||
+                    dados.mensagem ||
+                    'Não foi possível registrar o medicamento.'
+                );
+            }
+
+            console.log(
+                'Medicamento registrado com sucesso:',
+                dados.medicamento
+            );
+
+            // Fecha o Fancybox após o registro bem-sucedido.
+            Fancybox.close();
+
+            // Atualiza a lista sem recarregar a página.
+            try {
+                await atualizarMedicamentosMinistrados();
+            } catch (erro) {
+                console.error(
+                    'Medicamento registrado, mas a lista não foi atualizada:',
+                    erro
+                );
+
+                alert(
+                    'O medicamento foi registrado, mas não foi possível atualizar ' +
+                    'a lista. Atualize a página para consultar os registros.'
+                );
+            }
+
+        } catch (erro) {
+
+            console.error(
+                'Erro ao registrar medicamento:',
+                erro
+            );
+
+            campoErro.textContent = erro.message;
+            campoErro.classList.remove('d-none');
+
+        } finally {
+
+            botaoSalvar.disabled = false;
+        }
+    });
+}
+
+
+async function atualizarMedicamentosMinistrados() {
+    const url =
+        {% if atendimento.pk %}
+            const url = "{% url 'atendimentos:medicamentos_ministrados' atendimento.pk %}";
+        {% else %}
+            return;
+        {% endif %}
+
+    const resposta = await fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    });
+
+    if (!resposta.ok) {
+        throw new Error(
+            `Erro ao atualizar a lista: HTTP ${resposta.status}`
+        );
+    }
+
+    const html = await resposta.text();
+
+    const container = document.getElementById(
+        'container-medicamentos-ministrados'
+    );
+
+    if (!container) {
+        throw new Error('Container de medicamentos não encontrado.');
+    }
+
+    container.innerHTML = html;
+}
+
+
+{% if atendimento.pk %}
+    document.addEventListener('click', function (event) {
+        const link = event.target.closest('.js-editar-medicamento');
+
+        if (!link) {
+            return;
+        }
+
+        event.preventDefault();
+
+        abrirEdicaoMedicamento(link.href);
+    });
+{% endif %}
+
+
+document.addEventListener('click', async function (event) {
+    const botao = event.target.closest('.js-excluir-medicamento');
+
+    if (!botao) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const url = botao.dataset.url;
+    const nome = botao.dataset.nome || 'este medicamento';
+
+    const csrfToken = document.querySelector(
+        '#form-atendimento [name="csrfmiddlewaretoken"]'
+    )?.value;
+
+    if (!url || !csrfToken) {
+        console.error('URL de exclusão ou token CSRF não encontrado.');
+        return;
+    }
+
+    const resultado = await Swal.fire({
+        title: 'Excluir medicamento ministrado?',
+        text: `Deseja realmente excluir ${nome}? A quantidade será devolvida ao estoque.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, excluir',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+    });
+
+    if (!resultado.isConfirmed) {
+        return;
+    }
+
+    botao.disabled = true;
+
+    try {
+        const resposta = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok || !dados.sucesso) {
+            throw new Error(
+                dados.erro ||
+                dados.mensagem ||
+                'Não foi possível excluir o medicamento.'
+            );
+        }
+
+        await atualizarMedicamentosMinistrados();
+
+        await Swal.fire({
+            title: 'Excluído!',
+            text: 'O medicamento foi excluído.',
+            icon: 'success',
+            timer: 1800,
+            showConfirmButton: false
+        });
+
+    } catch (erro) {
+        console.error('Erro ao excluir medicamento:', erro);
+
+        await Swal.fire({
+            title: 'Erro!',
+            text: erro.message,
+            icon: 'error',
+            confirmButtonText: 'Fechar'
+        });
+    } finally {
+        botao.disabled = false;
+    }
+});
+
+
+</script>
+
+{% endblock %}

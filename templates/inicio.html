@@ -1,11 +1,367 @@
+
 {% extends 'base/app.html' %}
 
 {% block title %}Início | Resgatos{% endblock %}
 
 {% block content %}
-    <div class="page-header mb-3">
-        <h1 class="page-title">Início</h1>
+<div class="page-header mb-3">
+    <div class="resgatos-page-heading">
+        <div class="resgatos-page-icon" aria-hidden="true">
+           <i class="ti ti-device-desktop-analytics"></i>
+        </div>
+
+        <div>
+            <h1 class="resgatos-page-title">Dashboard</h1>
+            <p class="resgatos-page-description">
+                Visão geral da gestão da ONG Resgatos.
+            </p>
+        </div>
+    </div>
+</div>
+
+{# Indicadores gerais #}
+<div class="row row-cards mb-3">
+
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-blue-lt">
+                            <i class="ti ti-users fs-2"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="text-secondary">Pessoas ativas</div>
+                        <div class="h1 mb-0">{{ total_pessoas }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <p>Bem-vindo ao sistema Resgatos.</p>
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-purple-lt">
+                            <i class="ti ti-paw fs-2"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="text-secondary">Pets ativos</div>
+                        <div class="h1 mb-0">{{ total_pets }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-green-lt">
+                            <i class="ti ti-heart-handshake fs-2"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="text-secondary">Vínculos ativos</div>
+                        <div class="h1 mb-0">{{ total_vinculos }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-orange-lt">
+                            <i class="ti ti-first-aid-kit fs-2"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="text-secondary">Resgates</div>
+                        <div class="h1 mb-0">{{ total_resgates }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-cyan-lt">
+                            <i class="ti ti-stethoscope fs-2"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="text-secondary">Atendimentos</div>
+                        <div class="h1 mb-0">{{ total_atendimentos }}</div>
+                        <div class="text-secondary small">
+                            {{ atendimentos_mes }} neste mês
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-indigo-lt">
+                            <i class="ti ti-building-store fs-2"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="text-secondary">Fornecedores ativos</div>
+                        <div class="h1 mb-0">{{ total_fornecedores }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-yellow-lt">
+                            <i class="ti ti-package-import fs-2"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="text-secondary">Entradas de estoque</div>
+                        <div class="h1 mb-0">{{ total_entradas }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="avatar bg-azure-lt">
+                            <i class="ti ti-pill fs-2"></i>
+                        </span>
+                    </div>
+                    <div class="col">
+                        <div class="text-secondary">Medicamentos</div>
+                        <div class="h1 mb-0">{{ medicamentos_ativos }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{# Alertas de estoque #}
+<div class="row row-cards mb-3">
+
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-alert-triangle me-2"></i>
+                    Alertas de estoque
+                </h3>
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="avatar bg-red-lt">
+                                <i class="ti ti-calendar-x fs-2"></i>
+                            </span>
+                            <div>
+                                <div class="text-secondary">
+                                    Lotes vencidos com saldo
+                                </div>
+                                <div class="h2 mb-0">
+                                    {{ lotes_vencidos }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="avatar bg-yellow-lt">
+                                <i class="ti ti-calendar-clock fs-2"></i>
+                            </span>
+                            <div>
+                                <div class="text-secondary">
+                                    Vencimento nos próximos 30 dias
+                                </div>
+                                <div class="h2 mb-0">
+                                    {{ lotes_proximos_vencimento }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="avatar bg-orange-lt">
+                                <i class="ti ti-package-off fs-2"></i>
+                            </span>
+                            <div>
+                                <div class="text-secondary">
+                                    Medicamentos no mínimo ou abaixo
+                                </div>
+                                <div class="h2 mb-0">
+                                    {{ medicamentos_estoque_baixo }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+{# Medicamentos com estoque baixo #}
+<div class="row row-cards mb-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-alert-triangle me-2 text-warning"></i>
+                    Medicamentos que precisam de reposição
+                </h3>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table">
+                    <thead>
+                        <tr>
+                            <th>Medicamento</th>
+                            <th>Estoque atual</th>
+                            <th>Estoque mínimo</th>
+                            <th>Diferença</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for medicamento in medicamentos_reposicao %}
+                            <tr>
+                                <td class="fw-medium">
+                                    {{ medicamento.nome }}
+                                </td>
+                                <td>
+                                    <span class="fw-bold">
+                                        {{ medicamento.estoque_atual|floatformat:2 }}
+                                        {{ medicamento.unidade_medida }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{ medicamento.estoque_minimo|floatformat:2 }}
+                                    {{ medicamento.unidade_medida }}
+                                </td>
+                                <td>
+                                    {% if medicamento.diferenca_estoque < 0 %}
+                                        <span class="badge bg-danger-lt">
+                                            {{ medicamento.diferenca_estoque|floatformat:2 }}
+                                            {{ medicamento.unidade_medida }}
+                                        </span>
+                                    {% elif medicamento.diferenca_estoque == 0 %}
+                                        <span class="badge bg-yellow-lt">
+                                            No mínimo
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-green-lt">
+                                            +{{ medicamento.diferenca_estoque|floatformat:2 }}
+                                            {{ medicamento.unidade_medida }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-secondary py-4">
+                                    <i class="ti ti-circle-check me-1"></i>
+                                    Nenhum medicamento abaixo do estoque mínimo.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{# Atendimentos recentes #}
+<div class="row row-cards mb-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-stethoscope me-2"></i>
+                    Atendimentos recentes
+                </h3>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table">
+                    <thead>
+                        <tr>
+                            <th>Data e hora</th>
+                            <th>Pet</th>
+                            <th>Tipo</th>
+                            <th>Responsável</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for atendimento in atendimentos_recentes %}
+                            <tr>
+                                <td class="text-secondary">
+                                    {{ atendimento.data_hora|date:"d/m/Y H:i" }}
+                                </td>
+                                <td class="fw-medium">
+                                    {{ atendimento.pet.nome }}
+                                </td>
+                                <td>
+                                    {{ atendimento.get_tipo_display }}
+                                </td>
+                                <td>
+                                    {{ atendimento.responsavel.nome }}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-secondary py-4">
+                                    Nenhum atendimento registrado.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -620,12 +620,11 @@ function inicializarFormularioMedicamento(container) {
 
 
 async function atualizarMedicamentosMinistrados() {
-    const url =
-        {% if atendimento.pk %}
-            const url = "{% url 'atendimentos:medicamentos_ministrados' atendimento.pk %}";
-        {% else %}
-            return;
-        {% endif %}
+    {% if atendimento.pk %}
+        const url = "{% url 'atendimentos:medicamentos_ministrados' atendimento.pk %}";
+    {% else %}
+        return;
+    {% endif %}
 
     const resposta = await fetch(url, {
         headers: {
@@ -651,6 +650,7 @@ async function atualizarMedicamentosMinistrados() {
 
     container.innerHTML = html;
 }
+
 
 
 {% if atendimento.pk %}

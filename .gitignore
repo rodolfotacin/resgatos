@@ -33,3 +33,10 @@ htmlcov/
 
 # Data
 data/
+
+# Django - produção
+staticfiles/
+
+# Segredos e certificados
+*.pem
+*.key

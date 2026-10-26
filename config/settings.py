@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-nvixq+nu@e4&e-dipdaq=oa_5mv)k*@sqj1#&!#4up=(flg$ex'
+# SECRET_KEY = 'django-insecure-nvixq+nu@e4&e-dipdaq=oa_5mv)k*@sqj1#&!#4up=(flg$ex'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-chave-apenas-desenvolvimento'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        'DJANGO_ALLOWED_HOSTS',
+        'localhost,127.0.0.1'
+    ).split(',')
+    if host.strip()
+]
 
 
 # Application definition
@@ -51,6 +64,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -90,11 +104,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'resgatos',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+        'NAME': os.environ.get('MYSQLDATABASE', 'resgatos'),
+        'USER': os.environ.get('MYSQLUSER', 'root'),
+        'PASSWORD': os.environ.get('MYSQLPASSWORD', ''),
+        'HOST': os.environ.get('MYSQLHOST', '127.0.0.1'),
+        'PORT': os.environ.get('MYSQLPORT', '3306'),
         'OPTIONS': {
             'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -125,9 +139,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
@@ -137,7 +151,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # Email

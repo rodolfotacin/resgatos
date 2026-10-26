@@ -10,6 +10,7 @@ from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.db.models import Case, When, Value, IntegerField
 from django.shortcuts import get_object_or_404, redirect, render
+from apps.atendimentos.models import Atendimento
 from apps.resgates.models import Resgate
 from apps.pessoas.models import Pessoa
 
@@ -206,6 +207,14 @@ def editar(request, pet_id):
         )
     ).order_by('prioridade', '-data_inicio', '-id')
 
+    atendimentos = Atendimento.objects.filter(
+        pet=pet
+    ).select_related(
+        'responsavel'
+    ).order_by(
+        '-data_hora', '-id'
+    )
+
     if request.method == 'POST':
         dados = {
             'nome': request.POST.get('nome', '').strip(),
@@ -237,6 +246,7 @@ def editar(request, pet_id):
                     'dados': dados,
                     'resgates': resgates,
                     'situacoes': situacoes,
+                    'atendimentos': atendimentos,
                     'pessoas_relacionadas': pessoas_relacionadas,
                 },
             )
@@ -260,6 +270,7 @@ def editar(request, pet_id):
                     'dados': dados,
                     'resgates': resgates,
                     'situacoes': situacoes,
+                    'atendimentos': atendimentos,
                     'pessoas_relacionadas': pessoas_relacionadas,
                 },
             )
@@ -313,6 +324,7 @@ def editar(request, pet_id):
             'dados': dados,
             'resgates': resgates,
             'situacoes': situacoes,
+            'atendimentos': atendimentos,
             'pessoas_relacionadas': pessoas_relacionadas,
         },
     )

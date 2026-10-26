@@ -889,15 +889,71 @@
                         aria-labelledby="tab-atendimentos"
                         tabindex="0"
                     >
-                        <div class="empty">
-                            <div class="empty-icon">
-                                <i class="ti ti-stethoscope"></i>
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="ti ti-stethoscope me-2"></i>
+                                    Histórico de atendimentos
+                                </h3>
                             </div>
-                            <p class="empty-title">Atendimentos do pet</p>
-                            <p class="empty-subtitle text-secondary">
-                                O histórico de atendimentos será implementado
-                                nesta guia.
-                            </p>
+
+                            <div class="table-responsive">
+                                <table class="table table-vcenter">
+                                    <thead>
+                                        <tr>
+                                            <th>Data do atendimento</th>
+                                            <th>Tipo</th>
+                                            <th>Responsável</th>
+                                            <th>Motivo</th>
+                                            <th>Avaliação</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {% for atendimento in atendimentos %}
+                                            <tr>
+                                                <td>
+                                                    {{ atendimento.data_hora|date:"d/m/Y H:i" }}
+                                                </td>
+
+                                                <td>
+                                                    {{ atendimento.get_tipo_display }}
+                                                </td>
+
+                                                <td>
+                                                    {{ atendimento.responsavel.nome }}
+                                                </td>
+
+                                                <td>
+                                                    {{ atendimento.motivo|default:"—"|truncatechars:60 }}
+                                                </td>
+
+                                                <td>
+                                                    {{ atendimento.avaliacao|default:"—"|truncatechars:80 }}
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="5" class="text-center py-5">
+                                                    <div class="empty">
+                                                        <div class="empty-icon">
+                                                            <i class="ti ti-stethoscope"></i>
+                                                        </div>
+
+                                                        <p class="empty-title">
+                                                            Nenhum atendimento registrado
+                                                        </p>
+
+                                                        <p class="empty-subtitle text-secondary">
+                                                            O histórico de atendimentos deste pet aparecerá aqui.
+                                                        </p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
 

@@ -13,13 +13,13 @@
     <link rel="stylesheet" href="{% static 'vendor/sweetalert2/css/sweetalert2.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/fancybox/css/fancybox.css' %}">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
-    <link rel="stylesheet" href="{% static 'css/components/list.css' %}?vs=2">
+    <link rel="stylesheet" href="{% static 'css/components/list.css' %}?vs=4">
 </head>
 <body>
 <div class="resgatos-layout">
 
     <!-- SIDEBAR -->
-    <aside class="resgatos-sidebar">
+    <aside id="resgatos-sidebar" class="resgatos-sidebar">
 
         <!-- LOGO-->
         <div class="resgatos-brand">
@@ -36,6 +36,11 @@
                     </svg>
                 </span>
             </a>
+            <button type="button"
+                    class="resgatos-sidebar-close"
+                    aria-label="Fechar menu">
+                &times;
+            </button>
         </div>
 
         <!-- MENU -->
@@ -160,6 +165,8 @@
 
     </aside>
 
+    <div class="resgatos-sidebar-overlay"></div>
+
     <!-- MAIN -->
     <div class="resgatos-main">
 
@@ -167,16 +174,22 @@
         <header class="resgatos-topbar">
 
             <div class="resgatos-topbar-left">
-                <img src="{% static 'img/common/logo-resgatos.png' %}" alt="Logo Resgatos">
 
-                <button type="button" class="resgatos-mobile-menu" aria-label="Abrir menu">
-                    <svg viewBox="0 0 24 24"
-                         aria-hidden="true">
+                <button type="button"
+                        class="resgatos-mobile-menu"
+                        aria-label="Abrir menu"
+                        aria-expanded="false"
+                        aria-controls="resgatos-sidebar">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M4 6h16"/>
                         <path d="M4 12h16"/>
                         <path d="M4 18h16"/>
                     </svg>
                 </button>
+
+                <img src="{% static 'img/common/logo-resgatos.png' %}"
+                     alt="Logo Resgatos">
+
             </div>
 
             <div class="resgatos-topbar-right">
@@ -295,6 +308,65 @@
 <script src="{% static 'js/forms.js' %}"></script>
 <script src="{% static 'js/messages.js' %}"></script>
 <script src="{% static 'js/accessibility.js' %}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const menuButton = document.querySelector('.resgatos-mobile-menu');
+        const closeButton = document.querySelector('.resgatos-sidebar-close');
+        const sidebar = document.querySelector('.resgatos-sidebar');
+        const overlay = document.querySelector('.resgatos-sidebar-overlay');
+
+        if (!menuButton || !sidebar) {
+            return;
+        }
+
+        function setMenuOpen(open) {
+            sidebar.classList.toggle('is-open', open);
+
+            menuButton.setAttribute('aria-expanded', String(open));
+            menuButton.setAttribute(
+                'aria-label',
+                open ? 'Fechar menu' : 'Abrir menu'
+            );
+        }
+
+        menuButton.addEventListener('click', function () {
+            setMenuOpen(!sidebar.classList.contains('is-open'));
+        });
+
+        if (closeButton) {
+            closeButton.addEventListener('click', function () {
+                setMenuOpen(false);
+            });
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', function () {
+                setMenuOpen(false);
+            });
+        }
+
+        sidebar.querySelectorAll('a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 900) {
+                    setMenuOpen(false);
+                }
+            });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                setMenuOpen(false);
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 900) {
+                setMenuOpen(false);
+            }
+        });
+    });
+</script>
 
 {% block scripts %}{% endblock %}
 

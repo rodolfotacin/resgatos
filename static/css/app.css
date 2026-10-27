@@ -578,15 +578,109 @@ body {
     outline-offset: 2px;
 }
 
-@media (max-width: 767px) {
+/* AJUSTES DO CABEÇALHO EM DISPOSITIVOS MÓVEIS */
+@media (max-width: 767.98px) {
+
+    /* Oculta os controles de tamanho da fonte */
     .resgatos-accessibility {
-        gap: 2px;
-        margin-right: 8px;
+        display: none !important;
     }
 
-    .resgatos-accessibility-button {
-        min-width: 30px;
-        min-height: 32px;
-        padding: 4px;
+    /* Mantém o botão à esquerda e o logo ao lado */
+    .resgatos-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .resgatos-topbar-left img {
+        height: 48px;
+        max-width: calc(100vw - 170px);
+        object-fit: contain;
+    }
+
+    .resgatos-mobile-menu {
+        display: flex;
+        flex: 0 0 42px;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+        color: #263563;
+        cursor: pointer;
+        position: relative;
+        z-index: 1101;
+    }
+
+    .resgatos-topbar {
+        padding: 0 10px;
+        gap: 6px;
+    }
+
+    .resgatos-topbar-right {
+        flex: 0 0 auto;
+    }
+
+    .resgatos-user {
+        margin-left: 0;
+        padding-left: 8px;
+        gap: 6px;
+    }
+}
+
+
+/* FECHAR SIDEBAR NO MOBILE */
+.resgatos-sidebar-close {
+    display: none;
+}
+
+.resgatos-sidebar-overlay {
+    display: none;
+}
+
+@media (max-width: 900px) {
+
+    .resgatos-sidebar {
+        z-index: 1100;
+    }
+
+    .resgatos-sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1090;
+        background: rgba(0, 0, 0, 0.35);
+    }
+
+    .resgatos-sidebar.is-open ~ .resgatos-sidebar-overlay {
+        display: block;
+    }
+
+    .resgatos-brand {
+        position: relative;
+        justify-content: center;
+    }
+
+    /* Esconde o link institucional dentro do menu móvel */
+    .resgatos-brand-link {
+        display: none;
+    }
+
+    .resgatos-sidebar-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: #ffffff;
+        font-size: 30px;
+        cursor: pointer;
+    }
+
+    .resgatos-sidebar-close:hover {
+        background: rgba(255, 255, 255, 0.12);
     }
 }

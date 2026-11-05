@@ -1,0 +1,69 @@
+{% extends 'base/app.html' %}
+{% block content %}
+<div class="resgatos-page">
+  <header class="resgatos-page-header"><div class="resgatos-page-heading"><div>
+    <h1 class="resgatos-page-title">{% if edicao %}Editar{% else %}Novo registro —{% endif %} {{ titulo }}</h1>
+    <p class="resgatos-page-description">Preencha o formulário e salve para vincular ao cadastro existente.</p>
+  </div></div></header>
+  <div class="card"><div class="card-body">
+    {% if tipo == 'castracoes' %}<p class="text-secondary">O sexo indicado é um registro do procedimento e deve coincidir com o cadastro do gato, quando preenchido.</p>{% endif %}
+    {% if tipo == 'obitos' %}<p class="text-secondary">O óbito fica registrado no histórico. Esta ação não inativa automaticamente o cadastro do gato.</p>{% endif %}
+    {% if tipo == 'resgates' %}
+      {% if novo_resgate %}
+        <p class="text-secondary">
+          Registre aqui o resgate e as informações complementares, em uma única etapa.
+          O gato principal precisa estar cadastrado em Pets.
+          <a href="{% url 'pets:adicionar' %}">Cadastrar um gato</a>.
+        </p>
+        <p><a href="{% url 'registros:criar' 'resgates' %}?existente=1">O resgate já existe? Adicionar apenas os detalhes</a></p>
+      {% elif not edicao %}
+        <p class="text-secondary">Escolha um resgate já existente para adicionar suas informações complementares.</p>
+        <p><a href="{% url 'registros:criar' 'resgates' %}">Prefiro cadastrar um resgate completo</a></p>
+      {% endif %}
+    {% endif %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if modo_existente and tipo == 'resgates' %}<input type="hidden" name="modo" value="existente">{% endif %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="row">
+        {% for field in form.visible_fields %}
+          <div class="col-12 col-lg-6 mb-3">
+            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+            {{ field }}
+            {% if field.help_text %}<small class="form-hint">{{ field.help_text }}</small>{% endif %}
+            {% for erro in field.errors %}<div class="text-danger">{{ erro }}</div>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="d-flex gap-2 justify-content-end">
+        <a class="btn btn-outline-secondary" href="{% url 'registros:lista' tipo %}">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Salvar registro</button>
+      </div>
+    </form>
+  </div></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if tipo == 'castracoes' %}
+  {{ pet_sexos|json_script:"registros-pet-sexos" }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const gato = document.getElementById('id_pet');
+      const sexo = document.getElementById('id_sexo');
+      const dados = document.getElementById('registros-pet-sexos');
+      if (!gato || !sexo || !dados) return;
+      const sexos = JSON.parse(dados.textContent);
+
+      function preencherSexo() {
+        const encontrado = sexos[gato.value];
+        sexo.value = (encontrado === 'M' || encontrado === 'F') ? encontrado : '';
+        sexo.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+
+      gato.addEventListener('change', preencherSexo);
+      if (gato.value && !sexo.value) preencherSexo();
+    });
+  </script>
+{% endif %}
+{% endblock %}

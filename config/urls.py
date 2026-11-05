@@ -176,6 +176,7 @@ urlpatterns = [
     path('estoque/', include('apps.estoque.urls')),
     path('medicamentos/', include('apps.medicamentos.urls')),
     path('fornecedores/', include('apps.fornecedores.urls')),
+    path('registros/', include('apps.registros.urls')),
 ]
 
 if settings.DEBUG:

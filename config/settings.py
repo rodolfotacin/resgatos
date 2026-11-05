@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'apps.estoque',
     'apps.medicamentos',
     'apps.fornecedores',
+    'apps.registros',
     'core',
 ]
 

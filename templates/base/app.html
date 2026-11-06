@@ -85,6 +85,15 @@
                 </span>
             </a>
 
+            <!-- REGISTROS ESPECIAIS -->
+            <a href="{% url 'registros:inicio' %}"
+               class="resgatos-nav-item {% if request.resolver_match.app_name == 'registros' %} is-active{% endif %}"
+               aria-label="Registros Especiais" title="Registros Especiais">
+                <span class="resgatos-nav-icon">
+                    <i class="ti ti-clipboard-heart"></i>
+                </span>
+            </a>
+
             <!-- RESGATES -->
             <a href="{% url 'resgates:lista' %}" class="resgatos-nav-item {% if request.resolver_match.app_name == 'resgates' %} is-active{% endif %}" aria-label="Resgates" title="Resgates">
                 <span class="resgatos-nav-icon">

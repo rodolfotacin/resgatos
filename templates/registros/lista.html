@@ -1,0 +1,67 @@
+{% extends 'base/app.html' %}
+{% block content %}
+<div class="resgatos-page">
+  <header class="resgatos-page-header">
+    <div class="resgatos-page-heading"><div>
+      <h1 class="resgatos-page-title">Registros especiais</h1>
+      <p class="resgatos-page-description">Histórico clínico e dados complementares dos resgates</p>
+    </div></div>
+  </header>
+
+  <nav class="d-flex flex-wrap gap-2 mb-4" aria-label="Tipos de registros">
+    <a class="btn {% if tipo == 'castracoes' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="{% url 'registros:lista' 'castracoes' %}">Castrações</a>
+    <a class="btn {% if tipo == 'obitos' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="{% url 'registros:lista' 'obitos' %}">Óbitos</a>
+    <a class="btn {% if tipo == 'internacoes' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="{% url 'registros:lista' 'internacoes' %}">Internações</a>
+    <a class="btn {% if tipo == 'resgates' %}btn-primary{% else %}btn-outline-secondary{% endif %}" href="{% url 'registros:lista' 'resgates' %}">Detalhes dos resgates</a>
+  </nav>
+
+  <section class="card mb-3"><div class="card-body">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+      <h2 class="h3 m-0">{{ titulo }} ({{ total }})</h2>
+      {% if tipo == 'resgates' %}
+        <a class="btn btn-outline-secondary" href="{% url 'registros:criar' 'resgates' %}?existente=1">Complementar resgate existente</a>
+      {% endif %}
+      <a class="btn btn-primary" href="{% url 'registros:criar' tipo %}">
+        {% if tipo == 'resgates' %}Cadastrar resgate completo{% else %}Adicionar registro{% endif %}
+      </a>
+    </div>
+    <form method="get" class="d-flex gap-2 mb-3">
+      <input type="search" class="form-control" name="busca" aria-label="Buscar pelo nome do gato" value="{{ busca }}" placeholder="Nome do gato{% if tipo == 'resgates' %} ou local{% endif %}">
+      <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+    </form>
+    <div class="table-responsive"><table class="table table-vcenter">
+      <thead><tr><th>Gato / resgate</th><th>Data / situação</th><th>Informações</th><th></th></tr></thead>
+      <tbody>
+        {% for item in registros %}
+        <tr>
+          <td>
+            {% if tipo == 'resgates' %}
+              <a href="{% url 'resgates:editar' item.resgate_id %}">{{ item.resgate.pet.nome }}</a><br>
+              <small class="text-secondary">Resgate #{{ item.resgate_id }}</small>
+            {% else %}
+              <a href="{% url 'pets:editar' item.pet_id %}">{{ item.pet.nome }}</a>
+            {% endif %}
+          </td>
+          <td>
+            {% if tipo == 'castracoes' %}{{ item.data_castracao|date:'d/m/Y' }}
+            {% elif tipo == 'obitos' %}{{ item.data_obito|date:'d/m/Y' }}
+            {% elif tipo == 'internacoes' %}{{ item.data_internacao|date:'d/m/Y' }}
+            {% else %}{{ item.resgate.data_resgate|date:'d/m/Y' }}{% endif %}
+          </td>
+          <td>
+            {% if tipo == 'castracoes' %}{{ item.get_local_tipo_display }} — {{ item.nome_local }}
+            {% elif tipo == 'obitos' %}{{ item.motivo|truncatechars:90 }}
+            {% elif tipo == 'internacoes' %}{{ item.clinica }}{% if item.data_alta %} — alta em {{ item.data_alta|date:'d/m/Y' }}{% else %} — em aberto{% endif %}
+            {% else %}{{ item.quantidade_gatos }} gato(s) — {{ item.get_destino_display }}{% endif %}
+          </td>
+          <td><a class="btn btn-outline-secondary btn-sm" href="{% url 'registros:editar' tipo item.pk %}">Editar</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Nenhum registro encontrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table></div>
+    {% if total > 100 %}<p class="text-secondary">Mostrando os 100 registros mais recentes. Use a busca para localizar outros.</p>{% endif %}
+  </div></section>
+</div>
+{% endblock %}
